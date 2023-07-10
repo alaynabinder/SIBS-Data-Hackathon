@@ -1,0 +1,23 @@
+---
+title: "Research Plan"
+author: "Alayna Binder"
+date: "2023-07-10"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Background
+*On study and research questions*
+
+## Descriptive Analysis
+*Of the cohort being studied, including data visualizations*
+
+## Inferential Analysis
+*Including a justification of why the selected statistical methods are appropriate for addressing the selected research questions(s)*
+
+## Discussion and Limitations
+
+
