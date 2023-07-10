@@ -1,0 +1,24 @@
+---
+title: "Inferential Analysis"
+author: "Alayna Binder"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
+library(tidymodels)
+library(parsnip)
+library(patchwork)
+library(plotly)
+library(widgetframe)
+library(gtsummary)
+data <- read.csv('MICD.csv')
+```
+
+```{r inferential-analysis, echo=FALSE, warning=FALSE}
+
+
+
+```
