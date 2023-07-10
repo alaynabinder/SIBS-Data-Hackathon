@@ -1,10 +1,9 @@
 ---
 title: "Research Plan"
 author: "Alayna Binder"
-date: "2023-07-10"
 output:
-  html_document: default
-  pdf_document: default
+  html_document:
+    df_print: paged
 ---
 
 ```{r setup, include=FALSE}
