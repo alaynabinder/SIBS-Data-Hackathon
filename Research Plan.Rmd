@@ -2,15 +2,30 @@
 title: "Research Plan"
 author: "Alayna Binder"
 date: "2023-07-10"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(dplyr)
+data <- read.csv('MICD.csv')
 ```
 
 ## Background
 *On study and research questions*
+
+The primary goal is to identify risk factors for one of the following MI complications: atrial fibrillation, pulmonary edema, or relapse of the MI.
+
+## Research Questions
+
+1. Which covariates measured at hospital admission are correlated with a complication (i.e., which covariates may be useful for clinicians to monitor when treating MI patients)? Which are associated with an increased risk of complication? Which are associated with a decreased risk of complication?
+
+2. Are covariates measured during the hospital stay correlated with a complication? Do they provide information about the odds of a complication independent of covariates measured at the time of admission (i.e., should clinicians treating MI patients measure these covariates during the hospital stay)?
+
+3. Can these covariates be used to build a model that predicts the odds of a complication? 
 
 ## Descriptive Analysis
 *Of the cohort being studied, including data visualizations*
@@ -20,4 +35,5 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Discussion and Limitations
 
+* Missing data
 
