@@ -1,6 +1,6 @@
 ---
 title: "Descriptive Analysis"
-author: "Alayna Binder"
+author: "Alayna Binder, Isabella Shubert, Preeti Nagalamadaka and Olivia Xiao"
 output: html_document
 ---
 
@@ -19,7 +19,12 @@ data <- read.csv('MICD.csv')
 
 ```{r descriptive-analysis, echo=FALSE, warning=FALSE}
 
-data <- read.csv("MICD.csv", header = FALSE)
-View(data)
+#distribution of ages
+barplot(table(data$AGE), col = rainbow(300), main="Distribution of Ages in the Study",
+        xlab="Number of People",
+        ylab="Age")
+
+#summary of data
+#summary(data)
 
 ```
