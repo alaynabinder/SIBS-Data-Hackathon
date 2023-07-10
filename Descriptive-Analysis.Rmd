@@ -19,6 +19,7 @@ data <- read.csv('MICD.csv')
 
 ```{r descriptive-analysis, echo=FALSE, warning=FALSE}
 
-
+data <- read.csv("MICD.csv", header = FALSE)
+View(data)
 
 ```
