@@ -44,12 +44,6 @@ data <- read.csv('MICD.csv')
 
 ```{r stay, echo=FALSE, warning=FALSE}
 
-puled_stay <- linear_reg() %>%
-  set_engine("lm") %>%
-  fit(`O_L_POST` ~ `NA_R_1_n` + `NOT_NA_1_n`,
-      data = data)
 
-tidy(puled_stay, conf.int = TRUE)
-glance(puled_stay)$adj.r.squared
 
 ```
