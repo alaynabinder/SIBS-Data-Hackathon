@@ -15,7 +15,6 @@ data <- read.csv('MICD.csv')
 ```
 
 ## Background
-*On study and research questions*
 
 The primary goal is to identify risk factors for one of the following MI complications: atrial fibrillation, pulmonary edema, or relapse of the MI.
 
@@ -25,7 +24,7 @@ The primary goal is to identify risk factors for one of the following MI complic
 
 2. Are covariates measured during the hospital stay correlated with a complication? Do they provide information about the odds of a complication independent of covariates measured at the time of admission (i.e., should clinicians treating MI patients measure these covariates during the hospital stay)?
 
-3. Can these covariates be used to build a model that predicts the odds of a complication? 
+3. Can these covariates be used to build a model that predicts the odds of a complication?
 
 ## Descriptive Analysis
 *Of the cohort being studied, including data visualizations*
