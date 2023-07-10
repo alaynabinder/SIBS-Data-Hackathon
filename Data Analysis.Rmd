@@ -1,0 +1,55 @@
+---
+title: "Data Analysis"
+author: "Alayna Binder"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
+library(tidymodels)
+library(parsnip)
+library(patchwork)
+library(plotly)
+library(widgetframe)
+library(gtsummary) # Cox & Hazards
+data <- read.csv('MICD.csv')
+```
+
+## Categorizing Variables
+
+#### Hospital Admission
+
+*Potential Predictors*
+* 
+
+#### Hospital Stay
+
+*Potential Predictors*
+* 
+
+```{r exploratory, echo=FALSE, warning=FALSE}
+
+
+
+```
+
+```{r admission, echo=FALSE, warning=FALSE}
+
+
+
+```
+
+```{r stay, echo=FALSE, warning=FALSE}
+
+puled_stay <- linear_reg() %>%
+  set_engine("lm") %>%
+  fit(`O_L_POST` ~ `NA_R_1_n` + `NOT_NA_1_n`,
+      data = data)
+
+tidy(puled_stay, conf.int = TRUE)
+glance(puled_stay)$adj.r.squared
+
+```
