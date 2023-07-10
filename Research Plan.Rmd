@@ -26,6 +26,8 @@ The primary goal is to identify risk factors for one of the following MI complic
 
 3. Can these covariates be used to build a model that predicts the odds of a complication?
 
+We will address all three questions in our data analysis and presentation.
+
 ## Descriptive Analysis
 *Of the cohort being studied, including data visualizations*
 
