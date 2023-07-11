@@ -19,12 +19,48 @@ data <- read.csv('MICD.csv')
 
 ```{r descriptive-analysis, echo=FALSE, warning=FALSE}
 
+superdata <- data
+
+# Creating AGE_GROUP; Recoding SEX
+superdata <- superdata %>%
+  mutate(AGE_GROUP = case_when(AGE >= 25 & AGE <= 34 ~ '25-34', AGE >= 35 & AGE <= 44 ~ '35-44', AGE >= 45 & AGE <= 54 ~ '45-54', AGE >= 55  & AGE <= 64 ~ '55-64', AGE >= 65 & AGE <= 74 ~ '65-74', AGE >= 75 & AGE <= 84 ~ '75-84', AGE >= 85 ~ '85+')) %>%
+  mutate(SEX = case_when(SEX == 0 ~ 'Female', SEX == 1 ~ 'Male')) %>%
+  relocate(AGE_GROUP, .after = AGE)
+
+```
+
+```{r testing, echo=FALSE, warning=FALSE}
+
+# NAs in each variable column
+colSums(is.na(superdata))
+
+#summary of data
+#summary(data)
+
+```
+
+```{r tables, echo=FALSE, warning=FALSE}
+
+
+
+```
+
+```{r visualizations, echo=FALSE, warning=FALSE}
+
 #distribution of ages
 barplot(table(data$AGE), col = rainbow(300), main="Distribution of Ages in the Study",
         xlab="Number of People",
         ylab="Age")
 
-#summary of data
-#summary(data)
+# Bar Plot for Age Group by Gender
+superdata %>%
+  drop_na(AGE_GROUP) %>% # Remove NAs
+  ggplot(aes(x = AGE_GROUP,
+                        fill = GENDER)) +
+  geom_bar() +
+  labs(x = 'Age Group',
+       y = 'Count',
+       fill = 'Gender',
+       title = 'Age Group by Gender')
 
 ```
