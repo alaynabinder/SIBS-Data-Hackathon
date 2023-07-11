@@ -14,10 +14,14 @@ library(patchwork)
 library(plotly)
 library(widgetframe)
 library(gtsummary)
+library(naniar)
 data <- read.csv('MICD.csv')
 ```
 
 ```{r descriptive-analysis, echo=FALSE, warning=FALSE}
+
+#figures out which factors are most missing using naniar package
+miss_var_summary(data)
 
 superdata <- data
 
