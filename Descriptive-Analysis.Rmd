@@ -48,15 +48,15 @@ colSums(is.na(superdata))
 ```{r visualizations, echo=FALSE, warning=FALSE}
 
 #distribution of ages
-barplot(table(data$AGE), col = rainbow(300), main="Distribution of Ages in the Study",
-        xlab="Number of People",
-        ylab="Age")
+# barplot(table(data$AGE), col = rainbow(300), main="Distribution of Ages in the Study",
+#         xlab="Number of People",
+#         ylab="Age")
 
 # Bar Plot for Age Group by Gender
 superdata %>%
   drop_na(AGE_GROUP) %>% # Remove NAs
   ggplot(aes(x = AGE_GROUP,
-                        fill = GENDER)) +
+                        fill = SEX)) +
   geom_bar() +
   labs(x = 'Age Group',
        y = 'Count',
