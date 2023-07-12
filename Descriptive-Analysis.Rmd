@@ -56,6 +56,12 @@ miss_var_summary(imputed_data)
 
 ```
 
+```{r descriptive_graphs, echo=FALSE, warning=FALSE}
+
+
+
+```
+
 ```{r visualizations, echo=FALSE, warning=FALSE}
 
 #distribution of ages
