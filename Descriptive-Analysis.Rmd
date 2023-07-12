@@ -14,6 +14,7 @@ library(patchwork)
 library(plotly)
 library(widgetframe)
 library(naniar)
+library(mice)
 data <- read.csv('MICD.csv')
 ```
 
