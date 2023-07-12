@@ -56,8 +56,13 @@ miss_var_summary(imputed_data)
 
 ```
 
-```{r descriptive_graphs, echo=FALSE, warning=FALSE}
+```{r descriptive_graphs_olivia, echo=FALSE, warning=FALSE}
 
+
+
+```
+
+```{r descriptive_graphs_preeti, echo=FALSE, warning=FALSE}
 
 
 ```
