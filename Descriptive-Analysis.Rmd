@@ -18,16 +18,15 @@ data <- read.csv('MICD.csv')
 ```
 
 ```{r descriptive-analysis, echo=FALSE, warning=FALSE}
-#hello
+
 superdata <- data
 
-# Creating AGE_GROUP; Recoding SEX
+# Creating AGE_GROUP; Recoding SEX; Removing missing data over 25%, then all complications except relapse
 superdata <- superdata %>%
   mutate(AGE_GROUP = case_when(AGE >= 25 & AGE <= 34 ~ '25-34', AGE >= 35 & AGE <= 44 ~ '35-44', AGE >= 45 & AGE <= 54 ~ '45-54', AGE >= 55  & AGE <= 64 ~ '55-64', AGE >= 65 & AGE <= 74 ~ '65-74', AGE >= 75 & AGE <= 84 ~ '75-84', AGE >= 85 ~ '85+')) %>%
   mutate(SEX = case_when(SEX == 0 ~ 'Female', SEX == 1 ~ 'Male')) %>%
-  relocate(AGE_GROUP, .after = AGE) 
-
-superdata <- select(superdata, - c(IBS_NASL, KFK_BLOOD, S_AD_KBRIG, D_AD_KBRIG, NOT_NA_KB, LID_KB, NA_KB))
+  relocate(AGE_GROUP, .after = AGE) %>%
+  select(- c(IBS_NASL, KFK_BLOOD, S_AD_KBRIG, D_AD_KBRIG, NOT_NA_KB, LID_KB, NA_KB, FIBR_PREDS, PREDS_TAH, JELUD_TAH, FIBR_JELUD, A_V_BLOK, OTEK_LANC, RAZRIV, DRESSLER, ZSN, P_IM_STEN, LET_IS))
 
 ```
 
