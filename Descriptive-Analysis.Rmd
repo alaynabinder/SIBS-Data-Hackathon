@@ -13,15 +13,11 @@ library(parsnip)
 library(patchwork)
 library(plotly)
 library(widgetframe)
-library(gtsummary)
 library(naniar)
 data <- read.csv('MICD.csv')
 ```
 
 ```{r descriptive-analysis, echo=FALSE, warning=FALSE}
-
-#figures out which factors are most missing using naniar package
-miss_var_summary(data)
 
 superdata <- data
 
@@ -29,14 +25,18 @@ superdata <- data
 superdata <- superdata %>%
   mutate(AGE_GROUP = case_when(AGE >= 25 & AGE <= 34 ~ '25-34', AGE >= 35 & AGE <= 44 ~ '35-44', AGE >= 45 & AGE <= 54 ~ '45-54', AGE >= 55  & AGE <= 64 ~ '55-64', AGE >= 65 & AGE <= 74 ~ '65-74', AGE >= 75 & AGE <= 84 ~ '75-84', AGE >= 85 ~ '85+')) %>%
   mutate(SEX = case_when(SEX == 0 ~ 'Female', SEX == 1 ~ 'Male')) %>%
-  relocate(AGE_GROUP, .after = AGE)
+  relocate(AGE_GROUP, .after = AGE) 
+
+superdata <- select(superdata, - c(IBS_NASL, KFK_BLOOD, S_AD_KBRIG, D_AD_KBRIG, NOT_NA_KB, LID_KB, NA_KB))
 
 ```
 
 ```{r testing, echo=FALSE, warning=FALSE}
 
-# NAs in each variable column
-colSums(is.na(superdata))
+# Missing Data
+# colSums(is.na(superdata))
+#figures out which factors are most missing using naniar package
+miss_var_summary(data)
 
 #summary of data
 #summary(data)
