@@ -34,6 +34,10 @@ superdata_admission <- superdata %>%
 superdata_stay <- superdata %>%
   select(c(R_AB_1_n, NA_R_1_n, NOT_NA_1_n, R_AB_2_n, NA_R_2_n, NOT_NA_2_n, R_AB_3_n, NA_R_3_n, NOT_NA_3_n))
 
+# Imputing data to get rid of missing data
+imputation_model <- mice(superdata, m = 1, method = "pmm")
+imputed_data <- complete(imputation_model, action = "long", include = TRUE)
+
 ```
 
 ```{r testing, echo=FALSE, warning=FALSE}
@@ -42,6 +46,7 @@ superdata_stay <- superdata %>%
 # colSums(is.na(superdata))
 #figures out which factors are most missing using naniar package
 miss_var_summary(data)
+miss_var_summary(imputed_data)
 
 #summary of data
 #summary(data)
