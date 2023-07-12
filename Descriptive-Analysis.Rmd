@@ -37,7 +37,7 @@ superdata_stay <- superdata %>%
 
 # Imputing data to get rid of missing data
 imputation_model <- mice(superdata, m = 1, method = "pmm")
-imputed_data <- complete(imputation_model, action = "long", include = TRUE)
+imputed_data <- complete(imputation_model, action = "long", include = FALSE)
 
 ```
 
