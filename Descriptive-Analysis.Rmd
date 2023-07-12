@@ -18,7 +18,7 @@ library(mice)
 data <- read.csv('MICD.csv')
 ```
 
-```{r descriptive-analysis, echo=FALSE, warning=FALSE}
+```{r imputing_data, echo=FALSE, warning=FALSE}
 
 superdata <- data
 
@@ -41,20 +41,16 @@ imputed_data <- complete(imputation_model, action = "long", include = FALSE)
 
 ```
 
-```{r testing, echo=FALSE, warning=FALSE}
+```{r missing_analysis, echo=FALSE, warning=FALSE}
 
 # Missing Data
-# colSums(is.na(superdata))
 #figures out which factors are most missing using naniar package
 miss_var_summary(data)
 miss_var_summary(imputed_data)
 
-#summary of data
-#summary(data)
-
 ```
 
-```{r tables, echo=FALSE, warning=FALSE}
+```{r multicollinearity, echo=FALSE, warning=FALSE}
 
 
 
