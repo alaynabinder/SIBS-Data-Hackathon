@@ -28,6 +28,12 @@ superdata <- superdata %>%
   relocate(AGE_GROUP, .after = AGE) %>%
   select(- c(IBS_NASL, KFK_BLOOD, S_AD_KBRIG, D_AD_KBRIG, NOT_NA_KB, LID_KB, NA_KB, FIBR_PREDS, PREDS_TAH, JELUD_TAH, FIBR_JELUD, A_V_BLOK, OTEK_LANC, RAZRIV, DRESSLER, ZSN, P_IM_STEN, LET_IS))
 
+superdata_admission <- superdata %>%
+  select(- c(R_AB_1_n, NA_R_1_n, NOT_NA_1_n, R_AB_2_n, NA_R_2_n, NOT_NA_2_n, R_AB_3_n, NA_R_3_n, NOT_NA_3_n))
+
+superdata_stay <- superdata %>%
+  select(c(R_AB_1_n, NA_R_1_n, NOT_NA_1_n, R_AB_2_n, NA_R_2_n, NOT_NA_2_n, R_AB_3_n, NA_R_3_n, NOT_NA_3_n))
+
 ```
 
 ```{r testing, echo=FALSE, warning=FALSE}
