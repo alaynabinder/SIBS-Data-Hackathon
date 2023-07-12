@@ -15,6 +15,7 @@ library(plotly)
 library(widgetframe)
 library(naniar)
 library(mice)
+library(car)
 data <- read.csv('MICD.csv')
 ```
 
@@ -39,6 +40,12 @@ superdata_stay <- superdata %>%
 imputation_model <- mice(superdata, m = 1, method = "pmm")
 imputed_data <- complete(imputation_model, action = "long", include = FALSE)
 
+imputed_data_admisison <- imputed_data %>%
+  select(c(R_AB_1_n, NA_R_1_n, NOT_NA_1_n, R_AB_2_n, NA_R_2_n, NOT_NA_2_n, R_AB_3_n, NA_R_3_n, NOT_NA_3_n))
+
+imputed_data_stay <- imputed_data %>%
+  select(c(R_AB_1_n, NA_R_1_n, NOT_NA_1_n, R_AB_2_n, NA_R_2_n, NOT_NA_2_n, R_AB_3_n, NA_R_3_n, NOT_NA_3_n))
+
 ```
 
 ```{r missing_analysis, echo=FALSE, warning=FALSE}
@@ -51,6 +58,12 @@ miss_var_summary(imputed_data)
 ```
 
 ```{r multicollinearity, echo=FALSE, warning=FALSE}
+
+#Admission
+
+
+
+#Stay
 
 
 
