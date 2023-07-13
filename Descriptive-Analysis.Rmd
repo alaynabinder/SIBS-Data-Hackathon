@@ -41,10 +41,10 @@ imputation_model <- mice(superdata, m = 1, method = "pmm")
 imputed_data <- complete(imputation_model, action = "long", include = FALSE)
 
 imputed_data_admisison <- imputed_data %>%
-  select(c(R_AB_1_n, NA_R_1_n, NOT_NA_1_n, R_AB_2_n, NA_R_2_n, NOT_NA_2_n, R_AB_3_n, NA_R_3_n, NOT_NA_3_n))
+  select(c(R_AB_1_n, NA_R_1_n, NOT_NA_1_n, R_AB_2_n, NA_R_2_n, NOT_NA_2_n, R_AB_3_n, NA_R_3_n, NOT_NA_3_n, REC_IM))
 
 imputed_data_stay <- imputed_data %>%
-  select(c(R_AB_1_n, NA_R_1_n, NOT_NA_1_n, R_AB_2_n, NA_R_2_n, NOT_NA_2_n, R_AB_3_n, NA_R_3_n, NOT_NA_3_n))
+  select(c(R_AB_1_n, NA_R_1_n, NOT_NA_1_n, R_AB_2_n, NA_R_2_n, NOT_NA_2_n, R_AB_3_n, NA_R_3_n, NOT_NA_3_n, REC_IM))
 
 ```
 
@@ -58,14 +58,26 @@ miss_var_summary(imputed_data)
 ```
 
 ```{r multicollinearity, echo=FALSE, warning=FALSE}
+# Data
+
+imputed <- subset(imputed_data, select = -c(.imp,.id,ritm_ecg_p_01, AGE, GB, S_AD_ORIT, ID)) 
+
+fit <- glm(REC_IM ~ ., 
+           data = imputed, family = 'binomial')
+summary(fit)
+t(t(vif(fit)))
 
 #Admission
 
-
+fit_admission <- glm(REC_IM ~ ., 
+           data = imputed_data_admisison, family = 'binomial')
+t(t(vif(fit_admission)))
 
 #Stay
 
-
+fit_stay <- glm(REC_IM ~ .,
+                data = imputed_data_stay, family= 'binomial')
+t(t(vif(fit_stay)))
 
 ```
 
