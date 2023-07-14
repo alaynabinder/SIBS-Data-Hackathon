@@ -1,5 +1,5 @@
 ---
-title: "Descriptive Analysis"
+title: "Analysis"
 author: "Alayna Binder, Isabella Shubert, Preeti Nagalamadaka and Olivia Xiao"
 output: html_document
 ---
@@ -23,16 +23,26 @@ data <- read.csv('MICD.csv')
 
 superdata <- data
 
-# Creating AGE_GROUP; Recoding SEX; Removing missing data over 25%, then all complications except relapse
+# Creating AGE_GROUP; recoding SEX; removing missing data over 25%, then all complications except relapse
 superdata <- superdata %>%
   mutate(AGE_GROUP = case_when(AGE >= 25 & AGE <= 34 ~ '25-34', AGE >= 35 & AGE <= 44 ~ '35-44', AGE >= 45 & AGE <= 54 ~ '45-54', AGE >= 55  & AGE <= 64 ~ '55-64', AGE >= 65 & AGE <= 74 ~ '65-74', AGE >= 75 & AGE <= 84 ~ '75-84', AGE >= 85 ~ '85+')) %>%
   mutate(SEX = case_when(SEX == 0 ~ 'Female', SEX == 1 ~ 'Male')) %>%
   relocate(AGE_GROUP, .after = AGE) %>%
   select(- c(IBS_NASL, KFK_BLOOD, S_AD_KBRIG, D_AD_KBRIG, NOT_NA_KB, LID_KB, NA_KB, FIBR_PREDS, PREDS_TAH, JELUD_TAH, FIBR_JELUD, A_V_BLOK, OTEK_LANC, RAZRIV, DRESSLER, ZSN, P_IM_STEN, LET_IS))
 
+# Factoring ordinal variables
+superdata$FK_STENOK = as.factor(superdata$FK_STENOK)
+superdata$IBS_POST = as.factor(superdata$IBS_POST)
+superdata$GB = as.factor(superdata$GB)
+superdata$DLIT_AG = as.factor(superdata$DLIT_AG)
+superdata$ZSN_A = as.factor(superdata$ZSN_A)
+superdata$TIME_B_S = as.factor(superdata$TIME_B_S)
+
+# Superdata for admission
 superdata_admission <- superdata %>%
   select(- c(R_AB_1_n, NA_R_1_n, NOT_NA_1_n, R_AB_2_n, NA_R_2_n, NOT_NA_2_n, R_AB_3_n, NA_R_3_n, NOT_NA_3_n))
 
+# Superdata for stay
 superdata_stay <- superdata %>%
   select(c(R_AB_1_n, NA_R_1_n, NOT_NA_1_n, R_AB_2_n, NA_R_2_n, NOT_NA_2_n, R_AB_3_n, NA_R_3_n, NOT_NA_3_n))
 
@@ -40,9 +50,11 @@ superdata_stay <- superdata %>%
 imputation_model <- mice(superdata, m = 1, method = "pmm")
 imputed_data <- complete(imputation_model, action = "long", include = FALSE)
 
-imputed_data_admisison <- imputed_data %>%
-  select(c(R_AB_1_n, NA_R_1_n, NOT_NA_1_n, R_AB_2_n, NA_R_2_n, NOT_NA_2_n, R_AB_3_n, NA_R_3_n, NOT_NA_3_n, REC_IM))
+# Imputed data for admission
+imputed_data_admission <- imputed_data %>%
+  select(-c(.imp, .id, ID, AGE_GROUP, R_AB_1_n, NA_R_1_n, NOT_NA_1_n, R_AB_2_n, NA_R_2_n, NOT_NA_2_n, R_AB_3_n, NA_R_3_n, NOT_NA_3_n))
 
+# Imputed data for stay
 imputed_data_stay <- imputed_data %>%
   select(c(R_AB_1_n, NA_R_1_n, NOT_NA_1_n, R_AB_2_n, NA_R_2_n, NOT_NA_2_n, R_AB_3_n, NA_R_3_n, NOT_NA_3_n, REC_IM))
 
@@ -50,35 +62,31 @@ imputed_data_stay <- imputed_data %>%
 
 ```{r missing_analysis, echo=FALSE, warning=FALSE}
 
-# Missing Data
-#figures out which factors are most missing using naniar package
+# Figures out which factors are most missing using naniar package
 miss_var_summary(data)
 miss_var_summary(imputed_data)
 
 ```
 
 ```{r multicollinearity, echo=FALSE, warning=FALSE}
-# Data
 
-imputed <- subset(imputed_data, select = -c(.imp,.id,ritm_ecg_p_01, AGE, GB, S_AD_ORIT, ID)) 
+# Without removing ritm_ecg_p_01, MC in ritm_ecg_p_01, 02, 04, 07, 08. No MC after removal.
+imputed_data_admission = imputed_data_admission %>%
+  select(-c(ritm_ecg_p_01))
 
-fit <- glm(REC_IM ~ ., 
-           data = imputed, family = 'binomial')
-summary(fit)
-t(t(vif(fit)))
+# Admission
+fit_admission_log <-
+  glm(REC_IM ~ ., data = imputed_data_admission, family = 'binomial')
+t(t(vif(fit_admission_log)))
+summary(fit_admission_log)
 
-#Admission
-#hello
+# ----------------------------------------------------------------------------
 
-fit_admission <- glm(REC_IM ~ ., 
-           data = imputed_data_admisison, family = 'binomial')
-t(t(vif(fit_admission)))
-
-#Stay
-
-fit_stay <- glm(REC_IM ~ .,
-                data = imputed_data_stay, family= 'binomial')
-t(t(vif(fit_stay)))
+# Stay
+fit_stay_log <-
+  glm(REC_IM ~ ., data = imputed_data_stay, family = 'binomial')
+t(t(vif(fit_stay_log)))
+summary(fit_stay_log)
 
 ```
 
@@ -95,7 +103,7 @@ t(t(vif(fit_stay)))
 
 ```{r visualizations, echo=FALSE, warning=FALSE}
 
-#distribution of ages
+# Distribution of ages
 # barplot(table(data$AGE), col = rainbow(300), main="Distribution of Ages in the Study",
 #         xlab="Number of People",
 #         ylab="Age")
@@ -104,7 +112,7 @@ t(t(vif(fit_stay)))
 superdata %>%
   drop_na(AGE_GROUP) %>% # Remove NAs
   ggplot(aes(x = AGE_GROUP,
-                        fill = SEX)) +
+             fill = SEX)) +
   geom_bar() +
   labs(x = 'Age Group',
        y = 'Count',
