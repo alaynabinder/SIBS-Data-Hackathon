@@ -98,6 +98,23 @@ summary(fit_stay_log)
 
 ```{r descriptive_graphs_preeti, echo=FALSE, warning=FALSE}
 
+#scatter plot of age vs mi relapse
+plot(imputed_data_admission$AGE,imputed_data_admission$REC_IM, main="Scatter Plot: Age", xlab="Age", ylab="MI Relapse")
+
+#bar graph of age vs MI relapse
+# Create age buckets
+age_buckets <- cut(imputed_data_admission$AGE, breaks = c(0, 30, 40, 50, 60, 70, Inf), labels = c("0-30", "31-40", "41-50", "51-60", "61-70", "71+"))
+
+# Calculate the number of people with and without the disease in each age bucket
+disease_counts <- table(age_buckets, imputed_data_admission$REC_IM)
+
+# Plot the bar graph
+barplot(t(disease_counts), beside = TRUE, main = "Bar Graph: Age vs MI Relapse",
+        xlab = "Age Group", ylab = "Number of People",
+        legend = c("No Relapse", "Relapse"), col = c("blue", "red"))
+
+#scatterplot of quantity of infarctions during anamnesis vs mi relapse
+plot(imputed_data_admission$INF_ANAM,imputed_data_admission$REC_IM, main="Scatter Plot: Quantity of Myocardial Infarctions in Anamnesis", xlab="Number of Myocardial Infarcations in Anamnesis", ylab="MI Relapse")
 
 ```
 
