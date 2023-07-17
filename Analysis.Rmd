@@ -227,9 +227,11 @@ ffit.stay <- stats::step(start.mod2,
              test="F",
              k=qchisq(1-alpha.crit,1))
 summary(ffit.stay)
-# R_AB_3_n, NA_R_2_n, NA_R_1_n
+# R_AB_3_n + NA_R_2_n + NA_R_1_n
 # 3 variables, AIC = 1025.6
 ```
+
+
 
 ```{r forward selection split data, echo = FALSE, warning = FALSE}
 # FORWARD SELECTION (anamnesis)
@@ -247,7 +249,9 @@ ffit.anamnesis <- stats::step(start.anamnesis,
              k=qchisq(1-alpha.crit,1))
 
 summary(ffit.anamnesis)
-# model variables: STENOK_AN, np_01, AGE, zab_leg_01, IBS_POST1, IBS_POST2, zab_leg_02, nr_03, endocr_01, nr_11, DLIT_AG1 through DLIT_AG7
+# STENOK_AN + np_01 + AGE + IBS_POST + zab_leg_01 + zab_leg_02 + 
+# nr_03, endocr_01, nr_11 + nr_04
+# 10 variables, AIC = 1004.4
 
 # ------------------------------------------------------------------------------------
 
@@ -266,7 +270,8 @@ ffit.ICUadmit <- stats::step(start.ICUadmit,
              k=qchisq(1-alpha.crit,1))
 
 summary(ffit.ICUadmit)
-#  model variables: GT_POST, K_SH_POST, ant_im, D_AD_ORIT, S_AD_ORIT
+#  GT_POST + K_SH_POST + lat_im + D_AD_ORIT
+# 4 variables: AIC = 1047
 
 # ------------------------------------------------------------------------------------
 
@@ -285,7 +290,8 @@ ffit.ICUstay <- stats::step(start.ICUstay,
              k=qchisq(1-alpha.crit,1))
 
 summary(ffit.ICUstay)
-#  model variables: R_AB_3_n, NA_R_2_n, GEPAR_S_n, TRENT_S_n, NA_R_1_n, ANT_CA_S_n, LID_S_n
+# R_AB_3_n + NA_R_2_n + GEPAR_S_n + TRENT_S_n + NA_R_1_n + ANT_CA_S_n + LID_S_n
+# 7 variables: AIC = 1020.2
 
 
 # ------------------------------------------------------------------------------------
@@ -305,6 +311,8 @@ ffit.HospitalAdmit <- stats::step(start.HospitalAdmit,
              k=qchisq(1-alpha.crit,1))
 
 summary(ffit.HospitalAdmit)
-#  model variables: TIME_B_S2 through TIME_B_S9, L_BLOOD, ritm_ecg_p_07, n_p_ecg_p_03, n_p_ecg_p_08, n_p_ecg_p_11, n_r_ecg_03, n_r_ecg_04, n_r_ecg_p_06, ROE
+# ritm_ecg_p_07 + TIME_B_S + n_p_ecg_p_11 + n_r_ecg_p_06 + n_r_ecg_p_07 + L_BLOOD + 
+# n_r_ecg_p_09 + n_r_ecg_p_08
+# 8 variables, AIC = 1037.5
 ```
 
