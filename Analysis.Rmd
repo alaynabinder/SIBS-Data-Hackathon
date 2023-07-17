@@ -94,12 +94,12 @@ miss_var_summary(data)
 # write.csv(imputed_data_ICU_stay, "./imputed_ICU_stay.csv", row.names=FALSE)
 
 #using data from csv so don't need to do imputation again
-imputed_data_admission <- read.csv(imputed_admission.csv)
-imputed_data_stay <- read.csv(imputed_stay.csv)
-imputed_data_amamnesis <- read.csv(imputed_anamnesis.csv)
-imputed_data_hospital_admit <- read.csv(imputed_hospital_admit.csv)
-imputed_data_ICU_admit <- read.csv(imputed_ICU_admit.csv)
-imputed_data_ICU_stay <- read.csv(imputed_ICU_stay.csv)
+imputed_data_admission <- read.csv('imputed_admission.csv')
+imputed_data_stay <- read.csv('imputed_stay.csv')
+imputed_data_anamnesis <- read.csv('imputed_anamnesis.csv')
+imputed_data_hospital_admit <- read.csv('imputed_hospital_admit.csv')
+imputed_data_ICU_admit <- read.csv('imputed_ICU_admit.csv')
+imputed_data_ICU_stay <- read.csv('imputed_ICU_stay.csv')
 
 # Without removing ritm_ecg_p_01, MC in ritm_ecg_p_01, 02, 04, 07, 08. No MC after removal.
 imputed_data_admission = imputed_data_admission %>%
