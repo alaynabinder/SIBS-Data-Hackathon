@@ -271,9 +271,9 @@ ffit.anamnesis <- stats::step(start.anamnesis,
              k=qchisq(1-alpha.crit,1))
 
 summary(ffit.anamnesis)
-# STENOK_AN + np_01 + AGE + IBS_POST + zab_leg_01 + zab_leg_02 + 
-# nr_03, endocr_01, nr_11 + nr_04
-# 10 variables, AIC = 1004.4
+# STENOK_AN + np_01 + AGE + zab_leg_01 + zab_leg_02 + 
+# IBS_POST + nr_03 +  nr_11 + endocr_01 + np_08
+# 10 variables, AIC = 1008.1
 
 # ------------------------------------------------------------------------------------
 
@@ -292,8 +292,8 @@ ffit.ICUadmit <- stats::step(start.ICUadmit,
              k=qchisq(1-alpha.crit,1))
 
 summary(ffit.ICUadmit)
-#  GT_POST + K_SH_POST + lat_im + D_AD_ORIT
-# 4 variables: AIC = 1047
+#  GT_POST + K_SH_POST + inf_im + D_AD_ORIT + IM_PG_P
+# 5 variables: AIC = 1047.7
 
 # ------------------------------------------------------------------------------------
 
@@ -312,8 +312,8 @@ ffit.ICUstay <- stats::step(start.ICUstay,
              k=qchisq(1-alpha.crit,1))
 
 summary(ffit.ICUstay)
-# R_AB_3_n + NA_R_2_n + GEPAR_S_n + TRENT_S_n + NA_R_1_n + ANT_CA_S_n + LID_S_n
-# 7 variables: AIC = 1020.2
+# R_AB_3_n + GEPAR_S_n + NA_R_2_n + TRENT_S_n + NA_R_1_n + ANT_CA_S_n
+# 6 variables: AIC = 1025.5
 
 
 # ------------------------------------------------------------------------------------
@@ -333,8 +333,9 @@ ffit.HospitalAdmit <- stats::step(start.HospitalAdmit,
              k=qchisq(1-alpha.crit,1))
 
 summary(ffit.HospitalAdmit)
-# ritm_ecg_p_07 + TIME_B_S + n_p_ecg_p_11 + n_r_ecg_p_06 + n_r_ecg_p_07 + L_BLOOD + 
-# n_r_ecg_p_09 + n_r_ecg_p_08
-# 8 variables, AIC = 1037.5
+# ritm_ecg_p_07 + n_r_ecg_p_09 + n_r_ecg_p_06 + L_BLOOD + TIME_B_S +
+# n_p_ecg_p_11 + n_r_ecg_p_03 + n_r_ecg_p_04 + n_p_ecg_p_08 + n_p_ecg_p_09 + 
+# n_p_ecg_p_03
+# 11 variables, AIC = 1037.3
 ```
 
