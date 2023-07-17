@@ -222,12 +222,15 @@ ffit.admission <- stats::step(start.mod,
              k=qchisq(1-alpha.crit,1))
 
 summary(ffit.admission)
-# STENOK_AN + np_01 + AGE + IBS_POST + n_r_ecg_p_06 + n_p_ecg_p_11 + 
-# L_BLOOD + K_SH_POST + GT_POST + zab_leg_01 + TIME_B_S + lat_im + 
-# ANT_CA_S_n + n_p_ecg_p_03 + ritm_ecg_p_04 + ritm_ecg_p_07 + np_10 + n_r_ecg_p_09 +
-# TIKL_S_n + GEPAR_S_n + zab_leg_02 + n_p_ecg_p_08 + nr_01 + O_L_POST +
-# endocr_01 + FIB_G_POST + n_r_ecg_p_05 + MP_TP_POST + nr_03
-# 29 variables, AIC = 956.28
+# STENOK_AN + K_SH_POST + np_01 + n_r_ecg_p_06 + AGE +
+# D_AD_ORIT + zab_leg_01 + lat_im + n_r_ecg_p_09 + NITR_S +
+# GIPER_NA + n_p_ecg_p_03 + np_10 + GEPAR_S_n + TRENT_S_n +
+# ANT_CA_S_n + endocr_01 + n_p_ecg_p_10 + zab_leg_02 + FIB_G_POST +
+# n_p_ecg_p_11 + IBS_POST + L_BLOOD + TIME_B_S + TIKL_S_n +
+# inf_im + nr_03 + ZSN_A 9 + nr_04 + ritm_ecg_p_02 +
+# n_p_ecg_p_04
+
+# 31 variables, AIC = 959.23
 
 # ------------------------------------------------------------------------------------
 
@@ -248,9 +251,8 @@ ffit.stay <- stats::step(start.mod2,
              k=qchisq(1-alpha.crit,1))
 summary(ffit.stay)
 # R_AB_3_n + NA_R_2_n + NA_R_1_n
-# 3 variables, AIC = 1025.6
+# 3 variables, AIC = 1028.2
 ```
-
 
 
 ```{r forward selection split data, echo = FALSE, warning = FALSE}
