@@ -352,3 +352,61 @@ summary(ffit.HospitalAdmit)
 # 11 variables, AIC = 1037.3
 ```
 
+```{r, backward-selection warning=FALSE}
+# backwards selection admission
+model.admit <- glm(REC_IM ~., data=imputed_data_admission,family='binomial')
+
+bfit.admit <- model.admit %>% stepAIC(direction='backward',trace=FALSE)
+summary(bfit.admit)
+
+# --------------------------------------------------
+
+# backwards selection stay
+model.stay <- glm(REC_IM ~., data=imputed_data_stay,family='binomial')
+
+bfit.stay <- model.stay %>% stepAIC(direction='backward',trace=FALSE)
+summary(bfit.stay)
+# NA_R_1_n + NA_R_2_n + R_AB_3_n
+# AIC: 1028.2
+
+# --------------------------------------------------
+
+# backwards selection anamnesis
+model.anamnesis <- glm(REC_IM ~., data=imputed_data_anamnesis,family='binomial')
+
+bfit.anamnesis <- model.anamnesis %>% stepAIC(direction='backward',trace=FALSE)
+summary(bfit.anamnesis)
+# AGE, STENOK_AN, IBS_POST, nr_03, np_01, endocr_01, zab_leg_01, zab_leg_02
+# AIC 1005.3
+
+# --------------------------------------------------
+
+# backwards selection ICU admit
+model.ICUadmit <- glm(REC_IM ~.,data=imputed_data_ICU_admit,family='binomial')
+
+bfit.ICUadmit <- model.ICUadmit %>% stepAIC(direction='backward',trace=FALSE)
+summary(bfit.ICUadmit)
+# D_AD_ORIT, K_SH_POST, GT_POST, inf_im, IM_PG_P
+# AIC: 1048.8
+
+# --------------------------------------------------
+
+# backwards selection ICU stay - same as forward
+model.ICUstay <- glm(REC_IM ~.,data=imputed_data_ICU_stay,family='binomial')
+
+bfit.ICUstay <- model.ICUstay %>% stepAIC(direction='backward',trace=FALSE)
+summary(bfit.ICUstay)
+# ANT_CA_S_n, GEPAR_S_, TRENT_S_n, R_AB_3_n, NA_R_1_n, NA_R_2_n
+# AIC: 1019.6
+
+# --------------------------------------------------
+
+# backwards selection hospital admit
+model.HospitalAdmit <- glm(REC_IM ~.,data=imputed_data_hospital_admit,family='binomial')
+
+bfit.HospitalAdmit <- model.HospitalAdmit %>% stepAIC(direction='backward',trace=FALSE)
+summary(bfit.HospitalAdmit)
+#  model variables: TIME_B_S2 through TIME_B_S9, L_BLOOD, ritm_ecg_p_07, n_p_ecg_p_08, n_p_ecg_p_09, n_r_ecg_03, n_r_ecg_04, n_r_ecg_p_06
+# AIC:1040.8 - same AIC as forward
+
+```
