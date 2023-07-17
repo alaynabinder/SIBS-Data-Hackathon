@@ -157,7 +157,20 @@ t(t(vif(fit_ICU_stay)))
 
 ```{r descriptive_graphs_olivia, echo=FALSE, warning=FALSE}
 
-
+#To get a stack
+imputed_data_stay$REC_IM <- as.factor(imputed_data_stay$REC_IM)
+ plot_day_1 <- ggplot(data = imputed_data_stay, aes(x= R_AB_1_n, fill = REC_IM))
+ plot_day_1 <- plot_day_1 + geom_bar(stat="count")
+ plot_day_1
+ 
+ plot_day_2 <- ggplot(data = imputed_data_stay, aes(x= R_AB_2_n, fill = REC_IM))
+ plot_day_2 <- plot_day_2 + geom_bar(stat="count")
+ plot_day_2
+ 
+ 
+ plot_day_3 <- ggplot(data = imputed_data_stay, aes(x= R_AB_3_n, fill = REC_IM))
+ plot_day_3 <- plot_day_3 + geom_bar(stat="count")
+ plot_day_3
 
 ```
 
