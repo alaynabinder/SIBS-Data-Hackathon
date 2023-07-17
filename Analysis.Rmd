@@ -23,13 +23,12 @@ data <- read.csv('MICD.csv')
 ```{r imputing_data, echo=FALSE, warning=FALSE}
 
 superdata <- data
-# 
-# # Creating AGE_GROUP; recoding SEX; removing missing data over 25%, then all complications except relapse
+
 # superdata <- superdata %>%
 #   mutate(AGE_GROUP = case_when(AGE >= 25 & AGE <= 34 ~ '25-34', AGE >= 35 & AGE <= 44 ~ '35-44', AGE >= 45 & AGE <= 54 ~ '45-54', AGE >= 55  & AGE <= 64 ~ '55-64', AGE >= 65 & AGE <= 74 ~ '65-74', AGE >= 75 & AGE <= 84 ~ '75-84', AGE >= 85 ~ '85+')) %>%
 #   mutate(SEX = case_when(SEX == 0 ~ 'Female', SEX == 1 ~ 'Male')) %>%
 #   relocate(AGE_GROUP, .after = AGE) %>%
-#   select(- c(IBS_NASL, KFK_BLOOD, S_AD_KBRIG, D_AD_KBRIG, NOT_NA_KB, LID_KB, NA_KB, FIBR_PREDS, PREDS_TAH, JELUD_TAH, FIBR_JELUD, A_V_BLOK, OTEK_LANC, RAZRIV, DRESSLER, ZSN, P_IM_STEN, LET_IS))
+#   dplyr::select(- c(IBS_NASL, KFK_BLOOD, S_AD_KBRIG, D_AD_KBRIG, NOT_NA_KB, LID_KB, NA_KB, FIBR_PREDS, PREDS_TAH, JELUD_TAH, FIBR_JELUD, A_V_BLOK, OTEK_LANC, RAZRIV, DRESSLER, ZSN, P_IM_STEN, LET_IS))
 # 
 # # Factoring ordinal variables
 # superdata$FK_STENOK = as.factor(superdata$FK_STENOK)
@@ -41,11 +40,11 @@ superdata <- data
 # 
 # # Superdata for admission
 # superdata_admission <- superdata %>%
-#   select(- c(R_AB_1_n, NA_R_1_n, NOT_NA_1_n, R_AB_2_n, NA_R_2_n, NOT_NA_2_n, R_AB_3_n, NA_R_3_n, NOT_NA_3_n))
+#   dplyr::select(- c(R_AB_1_n, NA_R_1_n, NOT_NA_1_n, R_AB_2_n, NA_R_2_n, NOT_NA_2_n, R_AB_3_n, NA_R_3_n, NOT_NA_3_n))
 # 
 # # Superdata for stay
 # superdata_stay <- superdata %>%
-#   select(c(R_AB_1_n, NA_R_1_n, NOT_NA_1_n, R_AB_2_n, NA_R_2_n, NOT_NA_2_n, R_AB_3_n, NA_R_3_n, NOT_NA_3_n))
+#   dplyr::select(c(R_AB_1_n, NA_R_1_n, NOT_NA_1_n, R_AB_2_n, NA_R_2_n, NOT_NA_2_n, R_AB_3_n, NA_R_3_n, NOT_NA_3_n))
 # 
 # # Imputing data to get rid of missing data
 # imputation_model <- mice(superdata, m = 1, method = "pmm")
@@ -53,78 +52,27 @@ superdata <- data
 # 
 # # Imputed data for admission
 # imputed_data_admission <- imputed_data %>%
-#   select(-c(.imp, .id, ID, AGE_GROUP, R_AB_1_n, NA_R_1_n, NOT_NA_1_n, R_AB_2_n, NA_R_2_n, NOT_NA_2_n, R_AB_3_n, NA_R_3_n, NOT_NA_3_n))
+#   dplyr::select(-c(.imp, .id, ID, AGE_GROUP, R_AB_1_n, NA_R_1_n, NOT_NA_1_n, R_AB_2_n, NA_R_2_n, NOT_NA_2_n, R_AB_3_n, NA_R_3_n, NOT_NA_3_n))
 # 
 # # Imputed data for stay
 # imputed_data_stay <- imputed_data %>%
-#   select(c(R_AB_1_n, NA_R_1_n, NOT_NA_1_n, R_AB_2_n, NA_R_2_n, NOT_NA_2_n, R_AB_3_n, NA_R_3_n, NOT_NA_3_n, REC_IM))
+#   dplyr::select(c(R_AB_1_n, NA_R_1_n, NOT_NA_1_n, R_AB_2_n, NA_R_2_n, NOT_NA_2_n, R_AB_3_n, NA_R_3_n, NOT_NA_3_n, REC_IM))
 # 
 # # Imputed data for anamnesis (patient-given history) and ECT
 # imputed_data_anamnesis <- imputed_data %>%
-#   select(c(AGE, SEX, INF_ANAM, STENOK_AN,FK_STENOK,IBS_POST,GB,SIM_GIPERT,DLIT_AG,ZSN_A,nr_11,nr_01,nr_02,nr_03,nr_04,nr_07,nr_08,np_01,np_04,np_05,np_07,np_08,np_09,np_10,endocr_01,endocr_02,endocr_03,zab_leg_01,zab_leg_02,zab_leg_03,zab_leg_06, REC_IM))
+#   dplyr::select(c(AGE, SEX, INF_ANAM, STENOK_AN,FK_STENOK,IBS_POST,GB,SIM_GIPERT,DLIT_AG,ZSN_A,nr_11,nr_01,nr_02,nr_03,nr_04,nr_07,nr_08,np_01,np_04,np_05,np_07,np_08,np_09,np_10,endocr_01,endocr_02,endocr_03,zab_leg_01,zab_leg_02,zab_leg_03,zab_leg_06, REC_IM))
 # 
 # # Imputed data Admission to ICU
 # imputed_data_ICU_admit <- imputed_data %>%
-#   select(c(S_AD_ORIT, D_AD_ORIT,O_L_POST,K_SH_POST,MP_TP_POST,SVT_POST,GT_POST,FIB_G_POST,ant_im,lat_im,inf_im,post_im,IM_PG_P, REC_IM))
+#   dplyr::select(c(S_AD_ORIT, D_AD_ORIT,O_L_POST,K_SH_POST,MP_TP_POST,SVT_POST,GT_POST,FIB_G_POST,ant_im,lat_im,inf_im,post_im,IM_PG_P, REC_IM))
 # 
 # #Imputed data Admission to Hospital
 # imputed_data_hospital_admit <- imputed_data %>%
-#   select(c(ritm_ecg_p_01,ritm_ecg_p_02,ritm_ecg_p_04,ritm_ecg_p_06,ritm_ecg_p_07,ritm_ecg_p_08,n_r_ecg_p_01,n_r_ecg_p_02,n_r_ecg_p_03,n_r_ecg_p_04,n_r_ecg_p_05,n_r_ecg_p_06,n_r_ecg_p_08,n_r_ecg_p_09,n_r_ecg_p_10,n_p_ecg_p_01,n_p_ecg_p_03,n_p_ecg_p_04,n_p_ecg_p_05,n_p_ecg_p_06,n_p_ecg_p_07,n_p_ecg_p_08,n_p_ecg_p_09,n_p_ecg_p_10,n_p_ecg_p_11,n_p_ecg_p_12,fibr_ter_01,fibr_ter_02,fibr_ter_03,fibr_ter_05,fibr_ter_06,fibr_ter_07,fibr_ter_08,GIPO_K,K_BLOOD,GIPER_NA,NA_BLOOD,ALT_BLOOD,AST_BLOOD,L_BLOOD,ROE,TIME_B_S, REC_IM))
+#   dplyr::select(c(ritm_ecg_p_01,ritm_ecg_p_02,ritm_ecg_p_04,ritm_ecg_p_06,ritm_ecg_p_07,ritm_ecg_p_08,n_r_ecg_p_01,n_r_ecg_p_02,n_r_ecg_p_03,n_r_ecg_p_04,n_r_ecg_p_05,n_r_ecg_p_06,n_r_ecg_p_08,n_r_ecg_p_09,n_r_ecg_p_10,n_p_ecg_p_01,n_p_ecg_p_03,n_p_ecg_p_04,n_p_ecg_p_05,n_p_ecg_p_06,n_p_ecg_p_07,n_p_ecg_p_08,n_p_ecg_p_09,n_p_ecg_p_10,n_p_ecg_p_11,n_p_ecg_p_12,fibr_ter_01,fibr_ter_02,fibr_ter_03,fibr_ter_05,fibr_ter_06,fibr_ter_07,fibr_ter_08,GIPO_K,K_BLOOD,GIPER_NA,NA_BLOOD,ALT_BLOOD,AST_BLOOD,L_BLOOD,ROE,TIME_B_S, REC_IM))
 # 
 # #Imputed data from time in ICU
 # imputed_data_ICU_stay <- imputed_data %>%
-#   select(c(NITR_S,LID_S_n,B_BLOK_S_n,ANT_CA_S_n,GEPAR_S_n,ASP_S_n,TIKL_S_n,TRENT_S_n,R_AB_1_n,R_AB_2_n,R_AB_3_n,NA_R_1_n,NA_R_2_n,NA_R_3_n,NOT_NA_1_n,NOT_NA_2_n,NOT_NA_3_n, REC_IM))
-
-# Creating AGE_GROUP; recoding SEX; removing missing data over 25%, then all complications except relapse
-superdata <- superdata %>%
-  mutate(AGE_GROUP = case_when(AGE >= 25 & AGE <= 34 ~ '25-34', AGE >= 35 & AGE <= 44 ~ '35-44', AGE >= 45 & AGE <= 54 ~ '45-54', AGE >= 55  & AGE <= 64 ~ '55-64', AGE >= 65 & AGE <= 74 ~ '65-74', AGE >= 75 & AGE <= 84 ~ '75-84', AGE >= 85 ~ '85+')) %>%
-  mutate(SEX = case_when(SEX == 0 ~ 'Female', SEX == 1 ~ 'Male')) %>%
-  relocate(AGE_GROUP, .after = AGE) %>%
-  dplyr::select(- c(IBS_NASL, KFK_BLOOD, S_AD_KBRIG, D_AD_KBRIG, NOT_NA_KB, LID_KB, NA_KB, FIBR_PREDS, PREDS_TAH, JELUD_TAH, FIBR_JELUD, A_V_BLOK, OTEK_LANC, RAZRIV, DRESSLER, ZSN, P_IM_STEN, LET_IS))
-
-# Factoring ordinal variables
-superdata$FK_STENOK = as.factor(superdata$FK_STENOK)
-superdata$IBS_POST = as.factor(superdata$IBS_POST)
-superdata$GB = as.factor(superdata$GB)
-superdata$DLIT_AG = as.factor(superdata$DLIT_AG)
-superdata$ZSN_A = as.factor(superdata$ZSN_A)
-superdata$TIME_B_S = as.factor(superdata$TIME_B_S)
-
-# Superdata for admission
-superdata_admission <- superdata %>%
-  dplyr::select(- c(R_AB_1_n, NA_R_1_n, NOT_NA_1_n, R_AB_2_n, NA_R_2_n, NOT_NA_2_n, R_AB_3_n, NA_R_3_n, NOT_NA_3_n))
-
-# Superdata for stay
-superdata_stay <- superdata %>%
-  dplyr::select(c(R_AB_1_n, NA_R_1_n, NOT_NA_1_n, R_AB_2_n, NA_R_2_n, NOT_NA_2_n, R_AB_3_n, NA_R_3_n, NOT_NA_3_n))
-
-# Imputing data to get rid of missing data
-imputation_model <- mice(superdata, m = 1, method = "pmm")
-imputed_data <- complete(imputation_model, action = "long", include = FALSE)
-
-# Imputed data for admission
-imputed_data_admission <- imputed_data %>%
-  dplyr::select(-c(.imp, .id, ID, AGE_GROUP, R_AB_1_n, NA_R_1_n, NOT_NA_1_n, R_AB_2_n, NA_R_2_n, NOT_NA_2_n, R_AB_3_n, NA_R_3_n, NOT_NA_3_n))
-
-# Imputed data for stay
-imputed_data_stay <- imputed_data %>%
-  dplyr::select(c(R_AB_1_n, NA_R_1_n, NOT_NA_1_n, R_AB_2_n, NA_R_2_n, NOT_NA_2_n, R_AB_3_n, NA_R_3_n, NOT_NA_3_n, REC_IM))
-
-# Imputed data for anamnesis (patient-given history) and ECT
-imputed_data_anamnesis <- imputed_data %>%
-  dplyr::select(c(AGE, SEX, INF_ANAM, STENOK_AN,FK_STENOK,IBS_POST,GB,SIM_GIPERT,DLIT_AG,ZSN_A,nr_11,nr_01,nr_02,nr_03,nr_04,nr_07,nr_08,np_01,np_04,np_05,np_07,np_08,np_09,np_10,endocr_01,endocr_02,endocr_03,zab_leg_01,zab_leg_02,zab_leg_03,zab_leg_06, REC_IM))
-
-# Imputed data Admission to ICU
-imputed_data_ICU_admit <- imputed_data %>%
-  dplyr::select(c(S_AD_ORIT, D_AD_ORIT,O_L_POST,K_SH_POST,MP_TP_POST,SVT_POST,GT_POST,FIB_G_POST,ant_im,lat_im,inf_im,post_im,IM_PG_P, REC_IM))
-
-#Imputed data Admission to Hospital
-imputed_data_hospital_admit <- imputed_data %>%
-  dplyr::select(c(ritm_ecg_p_01,ritm_ecg_p_02,ritm_ecg_p_04,ritm_ecg_p_06,ritm_ecg_p_07,ritm_ecg_p_08,n_r_ecg_p_01,n_r_ecg_p_02,n_r_ecg_p_03,n_r_ecg_p_04,n_r_ecg_p_05,n_r_ecg_p_06,n_r_ecg_p_08,n_r_ecg_p_09,n_r_ecg_p_10,n_p_ecg_p_01,n_p_ecg_p_03,n_p_ecg_p_04,n_p_ecg_p_05,n_p_ecg_p_06,n_p_ecg_p_07,n_p_ecg_p_08,n_p_ecg_p_09,n_p_ecg_p_10,n_p_ecg_p_11,n_p_ecg_p_12,fibr_ter_01,fibr_ter_02,fibr_ter_03,fibr_ter_05,fibr_ter_06,fibr_ter_07,fibr_ter_08,GIPO_K,K_BLOOD,GIPER_NA,NA_BLOOD,ALT_BLOOD,AST_BLOOD,L_BLOOD,ROE,TIME_B_S, REC_IM))
-
-#Imputed data from time in ICU
-imputed_data_ICU_stay <- imputed_data %>%
-  dplyr::select(c(NITR_S,LID_S_n,B_BLOK_S_n,ANT_CA_S_n,GEPAR_S_n,ASP_S_n,TIKL_S_n,TRENT_S_n,R_AB_1_n,R_AB_2_n,R_AB_3_n,NA_R_1_n,NA_R_2_n,NA_R_3_n,NOT_NA_1_n,NOT_NA_2_n,NOT_NA_3_n, REC_IM))
+#   dplyr::select(c(NITR_S,LID_S_n,B_BLOK_S_n,ANT_CA_S_n,GEPAR_S_n,ASP_S_n,TIKL_S_n,TRENT_S_n,R_AB_1_n,R_AB_2_n,R_AB_3_n,NA_R_1_n,NA_R_2_n,NA_R_3_n,NOT_NA_1_n,NOT_NA_2_n,NOT_NA_3_n, REC_IM))
 
 ```
 
@@ -146,12 +94,12 @@ miss_var_summary(data)
 # write.csv(imputed_data_ICU_stay, "./imputed_ICU_stay.csv", row.names=FALSE)
 
 #using data from csv so don't need to do imputation again
-imputed_data_admission <- read.csv(./imputed_admission.csv)
-imputed_data_stay <- read.csv(./imputed_stay.csv)
-imputed_data_amamnesis <- read.csv(./imputed_anamnesis.csv)
-imputed_data_hospital_admit <- read.csv(./imputed_hospital_admit.csv)
-imputed_data_ICU_admit <- read.csv(./imputed_ICU_admit.csv)
-imputed_data_ICU_stay <- read.csv(./imputed_ICU_stay.csv)
+imputed_data_admission <- read.csv(imputed_admission.csv)
+imputed_data_stay <- read.csv(imputed_stay.csv)
+imputed_data_amamnesis <- read.csv(imputed_anamnesis.csv)
+imputed_data_hospital_admit <- read.csv(imputed_hospital_admit.csv)
+imputed_data_ICU_admit <- read.csv(imputed_ICU_admit.csv)
+imputed_data_ICU_stay <- read.csv(imputed_ICU_stay.csv)
 
 # Without removing ritm_ecg_p_01, MC in ritm_ecg_p_01, 02, 04, 07, 08. No MC after removal.
 imputed_data_admission = imputed_data_admission %>%
