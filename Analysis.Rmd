@@ -23,7 +23,6 @@ data <- read.csv('MICD.csv')
 ```{r imputing_data, echo=FALSE, warning=FALSE}
 
 superdata <- data
-<<<<<<< HEAD
 # 
 # # Creating AGE_GROUP; recoding SEX; removing missing data over 25%, then all complications except relapse
 # superdata <- superdata %>%
@@ -75,7 +74,6 @@ superdata <- data
 # #Imputed data from time in ICU
 # imputed_data_ICU_stay <- imputed_data %>%
 #   select(c(NITR_S,LID_S_n,B_BLOK_S_n,ANT_CA_S_n,GEPAR_S_n,ASP_S_n,TIKL_S_n,TRENT_S_n,R_AB_1_n,R_AB_2_n,R_AB_3_n,NA_R_1_n,NA_R_2_n,NA_R_3_n,NOT_NA_1_n,NOT_NA_2_n,NOT_NA_3_n, REC_IM))
-=======
 
 # Creating AGE_GROUP; recoding SEX; removing missing data over 25%, then all complications except relapse
 superdata <- superdata %>%
@@ -127,7 +125,7 @@ imputed_data_hospital_admit <- imputed_data %>%
 #Imputed data from time in ICU
 imputed_data_ICU_stay <- imputed_data %>%
   dplyr::select(c(NITR_S,LID_S_n,B_BLOK_S_n,ANT_CA_S_n,GEPAR_S_n,ASP_S_n,TIKL_S_n,TRENT_S_n,R_AB_1_n,R_AB_2_n,R_AB_3_n,NA_R_1_n,NA_R_2_n,NA_R_3_n,NOT_NA_1_n,NOT_NA_2_n,NOT_NA_3_n, REC_IM))
->>>>>>> 8490d60246e67e7a0bb08545aba9dfcdcf7e64d2
+
 ```
 
 ```{r missing_analysis, echo=FALSE, warning=FALSE}
