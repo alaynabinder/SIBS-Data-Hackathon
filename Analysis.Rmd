@@ -30,6 +30,10 @@ superdata <- superdata %>%
   relocate(AGE_GROUP, .after = AGE) %>%
   dplyr::select(- c(IBS_NASL, KFK_BLOOD, S_AD_KBRIG, D_AD_KBRIG, NOT_NA_KB, LID_KB, NA_KB, FIBR_PREDS, PREDS_TAH, JELUD_TAH, FIBR_JELUD, A_V_BLOK, OTEK_LANC, RAZRIV, DRESSLER, ZSN, P_IM_STEN, LET_IS))
 
+ect_data <- data[, c('NOT_NA_KB', 'LID_KB', 'NA_KB', 'S_AD_KBRIG', 'D_AD_KBRIG', 'REC_IM')]
+ect_data_filtered <- ect_data[complete.cases(ect_data), ]
+#539 patients in filtered
+
 # # Factoring ordinal variables
 # superdata$FK_STENOK = as.factor(superdata$FK_STENOK)
 # superdata$IBS_POST = as.factor(superdata$IBS_POST)
@@ -49,6 +53,10 @@ superdata <- superdata %>%
 # # Imputing data to get rid of missing data
 # imputation_model <- mice(superdata, m = 1, method = "pmm")
 # imputed_data <- complete(imputation_model, action = "long", include = FALSE)
+
+#imputing ect data
+imputation_model_ect <- mice(ect_data_filtered, m = 1, method = "pmm")
+imputed_data_ect <- complete(imputation_model_ect, action = "long", include = FALSE)
 # 
 # # Imputed data for admission
 # imputed_data_admission <- imputed_data %>%
@@ -98,6 +106,7 @@ print(data[rows_with_missing_drugs, ])
 # write.csv(imputed_data_hospital_admit, "./imputed_hospital_admit.csv", row.names=FALSE)
 #write.csv(imputed_data_ICU_all, "./imputed_ICU_all.csv", row.names=FALSE)
 # write.csv(imputed_data, "./imputed_full.csv", row.names=FALSE)
+# write.csv(imputed_data_ect, "./imputed_ect.csv", row.names=FALSE)
 
 # Using data from csv to avoid rerunning imputation
 imputed_data_admission <- read.csv('imputed_admission.csv')
