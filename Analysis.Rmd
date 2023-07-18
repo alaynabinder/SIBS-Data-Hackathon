@@ -17,6 +17,8 @@ library(naniar)
 library(mice)
 library(car)
 library(MASS) # backward selection
+library(bestglm)
+library(glmnet) # LASSO
 data <- read.csv('MICD.csv')
 ```
 
@@ -104,16 +106,17 @@ print(data[rows_with_missing_drugs, ])
 # write.csv(imputed_data_stay, "./imputed_stay.csv", row.names=FALSE)
 # write.csv(imputed_data_anamnesis, "./imputed_amanesis.csv", row.names=FALSE)
 # write.csv(imputed_data_hospital_admit, "./imputed_hospital_admit.csv", row.names=FALSE)
-#write.csv(imputed_data_ICU_all, "./imputed_ICU_all.csv", row.names=FALSE)
+# write.csv(imputed_data_ICU_admit, "./imputed_ICU_admit.csv", row.names=FALSE)
+# write.csv(imputed_data_ICU_stay, "./imputed_ICU_stay.csv", row.names=FALSE)
 # write.csv(imputed_data, "./imputed_full.csv", row.names=FALSE)
-# write.csv(imputed_data_ect, "./imputed_ect.csv", row.names=FALSE)
 
 # Using data from csv to avoid rerunning imputation
 imputed_data_admission <- read.csv('imputed_admission.csv')
 imputed_data_stay <- read.csv('imputed_stay.csv')
 imputed_data_anamnesis <- read.csv('imputed_anamnesis.csv')
 imputed_data_hospital_admit <- read.csv('imputed_hospital_admit.csv')
-imputed_data_ICU_all <- read.csv('imputed_ICU_all.csv')
+imputed_data_ICU_admit <- read.csv('imputed_ICU_admit.csv')
+imputed_data_ICU_stay <- read.csv('imputed_ICU_stay.csv')
 imputed_data <- read.csv('imputed_full.csv')
 imputed_data_ect <- read.csv('imputed_ect.csv')
 
@@ -124,6 +127,7 @@ change_sex <- function(data){
 
 imputed_data_admission <- change_sex(imputed_data_admission)
 imputed_data_anamnesis <- change_sex(imputed_data_anamnesis)
+imputed_data <- change_sex(imputed_data)
 
 # ----------------------------------------------------------------------------
 # IMPUTED_DATA
@@ -131,7 +135,7 @@ imputed_data_anamnesis <- change_sex(imputed_data_anamnesis)
 # Removing ritm_ecg_p_01 eliminated MC
 
 imputed_data <- imputed_data %>%
-  dplyr::select(-c('.imp', '.id', 'ritm_ecg_p_01'))
+  dplyr::select(-c('.imp', '.id', 'ritm_ecg_p_01', 'ID', 'AGE_GROUP'))
 
 fit_imputed_data <- glm(REC_IM ~ ., data = imputed_data, family = 'binomial')
 t(t(vif(fit_imputed_data)))
@@ -141,8 +145,8 @@ summary(fit_imputed_data)
 # IMPUTED_DATA_ADMISSION
 
 # Removing ritm_ecg_p_01 eliminated MC
-# imputed_data_admission = imputed_data_admission %>%
-#   dplyr::select(-c(ritm_ecg_p_01))
+imputed_data_admission = imputed_data_admission %>%
+  dplyr::select(-c(ritm_ecg_p_01))
 
 fit_admission_log <-
   glm(REC_IM ~ ., data = imputed_data_admission, family = 'binomial')
@@ -180,16 +184,23 @@ t(t(vif(fit_anamnesis)))
 # IMPUTED_DATA_HOSPITAL_ADMIT
 
 # Removing ritm_ecg_p_01 gets rid of MC
-# imputed_data_hospital_admit = imputed_data_hospital_admit %>% dplyr::select(-c(ritm_ecg_p_01))
+imputed_data_hospital_admit = imputed_data_hospital_admit %>%
+  dplyr::select(-c(ritm_ecg_p_01))
 
 fit_hosp_admit <- glm(REC_IM ~ ., data=imputed_data_hospital_admit, family='binomial')
 t(t(vif(fit_hosp_admit)))
 
 # ----------------------------------------------------------------------------
-# IMPTED_DATA_ICU_ALL
+# IMPTED_DATA_ICU_ADMIT
 
-fit_ICU_all <- glm(REC_IM ~ ., data=imputed_data_ICU_all, family='binomial')
-t(t(vif(fit_ICU_all)))
+fit_ICU_admit <- glm(REC_IM ~ ., data=imputed_data_ICU_admit, family='binomial')
+t(t(vif(fit_ICU_admit)))
+
+# ----------------------------------------------------------------------------
+# IMPUTED_DATA_ICU_STAY
+
+fit_ICU_stay <- glm(REC_IM ~ ., data=imputed_data_ICU_stay, family='binomial')
+t(t(vif(fit_ICU_stay)))
 
 ```
 
@@ -445,93 +456,248 @@ summary(bfit.HospitalAdmit)
 
 ```
 
-```{r lasso_regression, echo=FALSE, warning=FALSE}
+```{r lasso_penalized_regression, echo=FALSE, warning=FALSE}
 
-# my_function <- function(X, y, alpha = 1, lambda = NULL) {
-#   
-#   X <- as.matrix(X)
-#   
-#   cv.lasso <- glmnet::cv.glmnet(X, y, alpha = alpha, standardize = TRUE, nfolds = 5)
-#   plot(cv.lasso)
-#   
-#   if (is.null(lambda)) {
-#     lambda <- cv.lasso$lambda.min
-#   }
-#   
-#   fit <- glmnet::glmnet(X, y, alpha = alpha, lambda = lambda, family = 'binomial')
-#   
-#   return(fit)
-# }
+# IMPUTED_DATA
 
-X <- imputed_data_admission
-y <- imputed_data_admission$REC_IM
-X <- as.matrix(X)
+# - Create data objects for lmnet() and cv.glment() functions:
+# data objects with covariates (xx) and outcome (yy) need to be separate;
+# outcome saved in a vector object;
+# covariates saved in a matrix object (not a data frame!) and only include
+# covariates to be considered in selection
+yy <- imputed_data[,'REC_IM']
+xx <- as.matrix(imputed_data[,c("AGE", "SEX", "INF_ANAM", "STENOK_AN", "FK_STENOK", "IBS_POST", "GB", "SIM_GIPERT", "DLIT_AG", "ZSN_A", "nr_11", 
+"nr_01", "nr_02", "nr_03", "nr_04", "nr_07", "nr_08", "np_01", 
+"np_04", "np_05", "np_07", "np_08", "np_09", "np_10", "endocr_01", 
+"endocr_02", "endocr_03", "zab_leg_01", "zab_leg_02", "zab_leg_03", 
+"zab_leg_04", "zab_leg_06", "S_AD_ORIT", "D_AD_ORIT", "O_L_POST", 
+"K_SH_POST", "MP_TP_POST", "SVT_POST", "GT_POST", "FIB_G_POST", 
+"ant_im", "lat_im", "inf_im", "post_im", "IM_PG_P", "ritm_ecg_p_02", 
+"ritm_ecg_p_04", "ritm_ecg_p_06", "ritm_ecg_p_07", "ritm_ecg_p_08", 
+"n_r_ecg_p_01", "n_r_ecg_p_02", "n_r_ecg_p_03", "n_r_ecg_p_04", 
+"n_r_ecg_p_05", "n_r_ecg_p_06", "n_r_ecg_p_08", "n_r_ecg_p_09", 
+"n_r_ecg_p_10", "n_p_ecg_p_01", "n_p_ecg_p_03", "n_p_ecg_p_04", 
+"n_p_ecg_p_05", "n_p_ecg_p_06", "n_p_ecg_p_07", "n_p_ecg_p_08", 
+"n_p_ecg_p_09", "n_p_ecg_p_10", "n_p_ecg_p_11", "n_p_ecg_p_12", 
+"fibr_ter_01", "fibr_ter_02", "fibr_ter_03", "fibr_ter_05", "fibr_ter_06", 
+"fibr_ter_07", "fibr_ter_08", "GIPO_K", "K_BLOOD", "GIPER_NA", 
+"NA_BLOOD", "ALT_BLOOD", "AST_BLOOD", "L_BLOOD", "ROE", "TIME_B_S", 
+"R_AB_1_n", "R_AB_2_n", "R_AB_3_n", "NITR_S", "NA_R_1_n", "NA_R_2_n", 
+"NA_R_3_n", "NOT_NA_1_n", "NOT_NA_2_n", "NOT_NA_3_n", "LID_S_n", 
+"B_BLOK_S_n", "ANT_CA_S_n", "GEPAR_S_n", "ASP_S_n", "TIKL_S_n", 
+"TRENT_S_n")])
+yy[1:1700]
+head(xx)
 
-fit <- glmnet::glmnet(X, y, alpha = 1, family = 'binomial')
-  
-cv.lasso <- glmnet::cv.glmnet(X, y, alpha = 1, standardize = TRUE, nfolds = 5)
+# - Use glmnet() function to get solutions path plot;
+# because glmnet() fits both LASSO and Ridge regression, use alpha
+# argument to specify which penalty to use (alpha = 1 --> LASSO)
+fit.lasso <- glmnet(xx, yy, alpha=1, standardize=TRUE)
+plot(fit.lasso, label=TRUE, xvar="lambda")
+cbind(1:103,colnames(xx))
+
+# - Use cv.glment() function to perform k-fold cross validation
+# to select the final model; need to set the seed so random
+# can be reproduced each time code is run
+set.seed(12345)
+cv.lasso <- cv.glmnet(xx, yy, alpha=1, standardize=TRUE, nfolds=10)
 plot(cv.lasso)
-  
-lambda <- cv.lasso$lambda.min
-  
-# fit <- my_function(imputed_data_admission2, imputed_data_admission$REC_IM)
+# - Value of lambda that minimizes MSPE:
+cv.lasso$lambda.min; log(cv.lasso$lambda.min)
 
-print(coef(fit))
+# - Regression coefficients for selected model
+lasso.coef <- coef(cv.lasso, s=cv.lasso$lambda.min)
+lasso.coef
+as.vector(lasso.coef)
 
+## Important variables: AGE + SEX + STENOK_AN + IBS_POST + nr_03 + np_01 + np_10 + endocr_01 + zab_leg_01 + zab_leg_02 + K_SH_POST + GT_POST + FIB_G_POST + aint_im + lat_im + inf_im + ritm_ecg_p_02 + ritm_ecg_p_07 + n_r_ecg_p_06 + n_r_ecg_p_09 + n_p_ecg_p_03 + n_p_ecg_p_07 + n_p_ecg_p_11 + GIPER_NA + ALT_BLOOD + L_BLOOD + R_AB_3_n + NITR_S + NA_R_1_n + NA_R_2_n + NA_R_3_n + ANT_CA_S_n + GEPAR_S_n + TRENT_S_n
 
-  # - Use LASSO to build prediction model
-  
-  # - Create data objects for glmnet() and cv.glment functions: 
-  #   data objects with covariates (xx) and outcome (yy) need to be separate; 
-  #   outcome saved in a vector object;
-  #   covariates saved in a matrix object (not a data frame!) and only include
-  #   covariates to be considered in selection
-  # cbind(1:length(data),names(comp)) 
-  # 
-  # # - Run into issues with factor variable; need to convert to dummy variables
-  # yy <- comp[,"High_HDL"]
-  # xx <- as.matrix(comp[,c(3:15)])
-  # yy[1:6]
-  # head(xx)
-  # 
-  # # - Create dummay variables for BMI_WHO
-  # xx <- model.matrix(fit.full)
-  # head(xx)
-  # 
-  # # - Drop intercept (don't want to enter twice)
-  # xx <- xx[,-1]
-  # head(xx)
-  # 
-  # # - Use glmnet() function to get solutions path plot; 
-  # #   because glmnet() fits both LASSO and Ridge regression, use alpha 
-  # #   argument to specify which penalty to use (alpha = 1 --> LASSO)
-  # fit.lasso <- glmnet(xx, yy, alpha=1, standardize=TRUE, family = 'binomial')
-  # plot(fit.lasso, label=TRUE, xvar="lambda")
-  # cbind(1:15,colnames(xx))
-  # 
-  # # - Hack to see lines bunched ... zoom-in by control range of y-axis
-  # plot(fit.lasso, label=TRUE, xvar="lambda",
-  #      ylim = c(0.02,-0.02))
-  # 
-  # # - Use cv.glment() function to perform k-fold cross validation
-  # #   to select the final model; need to set the seed so random 
-  # #   can be reproduced each time code is run
-  # set.seed(823)
-  # cv.lasso <- cv.glmnet(xx, yy, alpha=1, standardize=TRUE, nfolds=10, family = 'binomial')
-  # plot(cv.lasso)
-  # 
-  # # - Value of lamda that minimizes MSPE: 
-  # cv.lasso$lambda.min; log(cv.lasso$lambda.min)
-  # cv.lasso$lambda.1se; log(cv.lasso$lambda.1se)
-  # 
-  # # - Regression coefficients for selected model
-  # lasso.coef <- coef(cv.lasso, s=cv.lasso$lambda.min)
-  # lasso.coef
-  # 
-  # lasso.coef <- coef(cv.lasso, s=cv.lasso$lambda.1se)
-  # lasso.coef
-    
-}
+# ----------------------------------------------------------------------------
+# IMPUTED_DATA_ADMISSION
+
+yy <- imputed_data_admission[,'REC_IM']
+xx <- as.matrix(imputed_data_admission[,c("AGE", "SEX", "INF_ANAM", "STENOK_AN", "FK_STENOK", "IBS_POST", 
+"GB", "SIM_GIPERT", "DLIT_AG", "ZSN_A", "nr_11", "nr_01", "nr_02", 
+"nr_03", "nr_04", "nr_07", "nr_08", "np_01", "np_04", "np_05", 
+"np_07", "np_08", "np_09", "np_10", "endocr_01", "endocr_02", 
+"endocr_03", "zab_leg_01", "zab_leg_02", "zab_leg_03", "zab_leg_04", 
+"zab_leg_06", "S_AD_ORIT", "D_AD_ORIT", "O_L_POST", "K_SH_POST", 
+"MP_TP_POST", "SVT_POST", "GT_POST", "FIB_G_POST", "ant_im", 
+"lat_im", "inf_im", "post_im", "IM_PG_P", "ritm_ecg_p_02", 
+"ritm_ecg_p_04", "ritm_ecg_p_06", "ritm_ecg_p_07", "ritm_ecg_p_08", 
+"n_r_ecg_p_01", "n_r_ecg_p_02", "n_r_ecg_p_03", "n_r_ecg_p_04", 
+"n_r_ecg_p_05", "n_r_ecg_p_06", "n_r_ecg_p_08", "n_r_ecg_p_09", 
+"n_r_ecg_p_10", "n_p_ecg_p_01", "n_p_ecg_p_03", "n_p_ecg_p_04", 
+"n_p_ecg_p_05", "n_p_ecg_p_06", "n_p_ecg_p_07", "n_p_ecg_p_08", 
+"n_p_ecg_p_09", "n_p_ecg_p_10", "n_p_ecg_p_11", "n_p_ecg_p_12", 
+"fibr_ter_01", "fibr_ter_02", "fibr_ter_03", "fibr_ter_05", "fibr_ter_06", 
+"fibr_ter_07", "fibr_ter_08", "GIPO_K", "K_BLOOD", "GIPER_NA", 
+"NA_BLOOD", "ALT_BLOOD", "AST_BLOOD", "L_BLOOD", "ROE", "TIME_B_S", 
+"NITR_S", "LID_S_n", "B_BLOK_S_n", "ANT_CA_S_n", "GEPAR_S_n", 
+"ASP_S_n", "TIKL_S_n", "TRENT_S_n")])
+yy[1:1700]
+head(xx)
+
+fit.lasso <- glmnet(xx, yy, alpha=1, standardize=TRUE)
+plot(fit.lasso, label=TRUE, xvar="lambda")
+cbind(1:94,colnames(xx))
+
+set.seed(12345)
+cv.lasso <- cv.glmnet(xx, yy, alpha=1, standardize=TRUE, nfolds=10)
+plot(cv.lasso)
+cv.lasso$lambda.min; log(cv.lasso$lambda.min)
+
+lasso.coef <- coef(cv.lasso, s=cv.lasso$lambda.min)
+lasso.coef
+as.vector(lasso.coef)
+
+## Important variables: AGE + SEX + STENOK_AN + IBS_POST + nr_03 + np_01 + np_10 + endocr_01 + zab_leg_01 + zag_leg_02 + K_SH_POST + GT_POST + FIB_G_POST + ant_im + lat_im + ritm_ecg_p_02 + ritm_ecg_p_07 + n_r_ecg_p_06 + n_r_ecg_p_09 + n_p_ecg_p_03 + n_p_ecg_p_11 + GIPER_NA + L_BLOOD + NITR_S + ANT_CA_S_n + GEPAR_S_n + TRENT_S_n  
+
+# ----------------------------------------------------------------------------
+# IMPUTED_DATA_STAY
+
+yy <- imputed_data_stay[,'REC_IM']
+xx <- as.matrix(imputed_data_stay[,c('R_AB_1_n', 'NA_R_1_n', 'NOT_NA_1_n', 'R_AB_2_n', 'NA_R_2_n', 'NOT_NA_2_n', 'R_AB_3_n', 'NA_R_3_n', 'NOT_NA_3_n')])
+yy[1:1700]
+head(xx)
+
+fit.lasso <- glmnet(xx, yy, alpha=1, standardize=TRUE)
+plot(fit.lasso, label=TRUE, xvar="lambda")
+cbind(1:9,colnames(xx))
+
+set.seed(12345)
+cv.lasso <- cv.glmnet(xx, yy, alpha=1, standardize=TRUE, nfolds=10)
+plot(cv.lasso)
+cv.lasso$lambda.min; log(cv.lasso$lambda.min)
+
+lasso.coef <- coef(cv.lasso, s=cv.lasso$lambda.min)
+lasso.coef
+as.vector(lasso.coef)
+
+## Important variables: NA_R_1_n + NA_R_2_n + R_AB_3_n + NA_R_3_n
+
+# ----------------------------------------------------------------------------
+# IMPUTED_DATA_ECT
+
+yy <- imputed_data_ect[,'REC_IM']
+xx <- as.matrix(imputed_data_ect[,c('NOT_NA_KB', 'LID_KB', 'NA_KB', 'S_AD_KBRIG', 'D_AD_KBRIG')])
+yy[1:539]
+head(xx)
+
+fit.lasso <- glmnet(xx, yy, alpha=1, standardize=TRUE)
+plot(fit.lasso, label=TRUE, xvar="lambda")
+cbind(1:5,colnames(xx))
+
+set.seed(12345)
+cv.lasso <- cv.glmnet(xx, yy, alpha=1, standardize=TRUE, nfolds=10)
+plot(cv.lasso)
+cv.lasso$lambda.min; log(cv.lasso$lambda.min)
+
+lasso.coef <- coef(cv.lasso, s=cv.lasso$lambda.min)
+lasso.coef
+as.vector(lasso.coef)
+
+## Important variables: NOT_NA_KB + LID_KB + NA_KB + D_AD_KBRIG
+
+# ----------------------------------------------------------------------------
+# IMPUTED_DATA_ANAMNESIS
+
+yy <- imputed_data_anamnesis[,'REC_IM']
+xx <- as.matrix(imputed_data_anamnesis[,c("AGE", "SEX", "INF_ANAM", "STENOK_AN", "FK_STENOK", "IBS_POST", "GB", "DLIT_AG", "ZSN_A", "nr_11", "nr_01", "nr_02", "nr_03", "nr_04", "nr_07", "nr_08", "np_01", "np_04", "np_05", "np_07", "np_08", "np_09", "np_10", "endocr_01", "endocr_02", "endocr_03", "zab_leg_01", "zab_leg_02", "zab_leg_03", "zab_leg_06")])
+yy[1:1700]
+head(xx)
+
+fit.lasso <- glmnet(xx, yy, alpha=1, standardize=TRUE)
+plot(fit.lasso, label=TRUE, xvar="lambda")
+cbind(1:30,colnames(xx))
+
+set.seed(12345)
+cv.lasso <- cv.glmnet(xx, yy, alpha=1, standardize=TRUE, nfolds=10)
+plot(cv.lasso)
+cv.lasso$lambda.min; log(cv.lasso$lambda.min)
+
+lasso.coef <- coef(cv.lasso, s=cv.lasso$lambda.min)
+lasso.coef
+as.vector(lasso.coef)
+
+## Important variables: AGE + SEX + STENOK_AN + IBS_POST + DLIT_AG + nr_11 + nr_03 + nr_04 + np_01 + np_10 + endocr_01 + zab_leg_01 + zab_leg_02
+
+# ----------------------------------------------------------------------------
+# IMPUTED_DATA_HOSPITAL_ADMIT
+
+yy <- imputed_data_hospital_admit[,'REC_IM']
+xx <- as.matrix(imputed_data_hospital_admit[,c("ritm_ecg_p_02", "ritm_ecg_p_04", "ritm_ecg_p_06", "ritm_ecg_p_07", 
+"ritm_ecg_p_08", "n_r_ecg_p_01", "n_r_ecg_p_02", "n_r_ecg_p_03", 
+"n_r_ecg_p_04", "n_r_ecg_p_05", "n_r_ecg_p_06", "n_r_ecg_p_08", 
+"n_r_ecg_p_09", "n_r_ecg_p_10", "n_p_ecg_p_01", "n_p_ecg_p_03", 
+"n_p_ecg_p_04", "n_p_ecg_p_05", "n_p_ecg_p_06", "n_p_ecg_p_07", 
+"n_p_ecg_p_08", "n_p_ecg_p_09", "n_p_ecg_p_10", "n_p_ecg_p_11", 
+"n_p_ecg_p_12", "fibr_ter_01", "fibr_ter_02", "fibr_ter_03", 
+"fibr_ter_05", "fibr_ter_06", "fibr_ter_07", "fibr_ter_08", "GIPO_K", 
+"K_BLOOD", "GIPER_NA", "NA_BLOOD", "ALT_BLOOD", "AST_BLOOD", 
+"L_BLOOD", "ROE", "TIME_B_S")])
+yy[1:1700]
+head(xx)
+
+fit.lasso <- glmnet(xx, yy, alpha=1, standardize=TRUE)
+plot(fit.lasso, label=TRUE, xvar="lambda")
+cbind(1:41,colnames(xx))
+
+set.seed(12345)
+cv.lasso <- cv.glmnet(xx, yy, alpha=1, standardize=TRUE, nfolds=10)
+plot(cv.lasso)
+cv.lasso$lambda.min; log(cv.lasso$lambda.min)
+
+lasso.coef <- coef(cv.lasso, s=cv.lasso$lambda.min)
+lasso.coef
+as.vector(lasso.coef)
+
+## Important variables: NONE
+
+# ----------------------------------------------------------------------------
+# IMPUTED_DATA_ICU_ADMIT
+
+yy <- imputed_data_ICU_admit[,'REC_IM']
+xx <- as.matrix(imputed_data_ICU_admit[,c("S_AD_ORIT", "D_AD_ORIT", "O_L_POST", "K_SH_POST", "MP_TP_POST", "SVT_POST", "GT_POST", "FIB_G_POST", "ant_im", "lat_im", "inf_im", "post_im", "IM_PG_P")])
+yy[1:1700]
+head(xx)
+
+fit.lasso <- glmnet(xx, yy, alpha=1, standardize=TRUE)
+plot(fit.lasso, label=TRUE, xvar="lambda")
+cbind(1:13,colnames(xx))
+
+set.seed(12345)
+cv.lasso <- cv.glmnet(xx, yy, alpha=1, standardize=TRUE, nfolds=10)
+plot(cv.lasso)
+cv.lasso$lambda.min; log(cv.lasso$lambda.min)
+
+lasso.coef <- coef(cv.lasso, s=cv.lasso$lambda.min)
+lasso.coef
+as.vector(lasso.coef)
+
+## Important variables: D_AD_ORIT + K_SH_POST + SVT_POST + GT_POST + FIB_G_POST + ant_im + lat_im + inf_im + post_im + IM_PG_P
+
+# ----------------------------------------------------------------------------
+# IMPUTED_DATA_ICU_STAY
+
+yy <- imputed_data_ICU_stay[,'REC_IM']
+xx <- as.matrix(imputed_data_ICU_stay[,c("NITR_S", "LID_S_n", "B_BLOK_S_n", "ANT_CA_S_n", "GEPAR_S_n",  "ASP_S_n", "TIKL_S_n", "TRENT_S_n", "R_AB_1_n", "R_AB_2_n", "R_AB_3_n",  "NA_R_1_n", "NA_R_2_n", "NA_R_3_n", "NOT_NA_1_n", "NOT_NA_2_n", "NOT_NA_3_n")])
+yy[1:1700]
+head(xx)
+
+fit.lasso <- glmnet(xx, yy, alpha=1, standardize=TRUE)
+plot(fit.lasso, label=TRUE, xvar="lambda")
+cbind(1:17,colnames(xx))
+
+set.seed(12345)
+cv.lasso <- cv.glmnet(xx, yy, alpha=1, standardize=TRUE, nfolds=10)
+plot(cv.lasso)
+cv.lasso$lambda.min; log(cv.lasso$lambda.min)
+
+lasso.coef <- coef(cv.lasso, s=cv.lasso$lambda.min)
+lasso.coef
+as.vector(lasso.coef)
+
+## Important variables: NITR_S + LID_S_n + ANT_CA_S_n + GEPAR_S_n + ASP_S_n + TIKL_S_n + TRENT_S_n + R_AB_3_n + NA_R_1_n + NA_R_2_n + NA_R_3_n + NOT_NA_2_n + NOT_NA_3_n
 
 ```
-
