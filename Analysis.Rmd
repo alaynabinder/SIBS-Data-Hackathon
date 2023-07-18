@@ -82,6 +82,15 @@ superdata <- superdata %>%
 miss_var_summary(data)
 # miss_var_summary(imputed_data)
 
+#Compares missing rows
+rows_with_missing_all<-  is.na(data$NOT_NA_KB) & is.na(data$NA_KB) & is.na(data$LID_KB) & is.na(data$S_AD_KBRIG) & is.na(data$D_AD_KBRIG)
+print(data[rows_with_missing_all, ])
+
+rows_with_missing_pressure <- is.na(data$S_AD_KBRIG) & is.na(data$D_AD_KBRIG)
+print(data[rows_with_missing_pressure, ])
+
+rows_with_missing_drugs <- is.na(data$NOT_NA_KB) & is.na(data$NA_KB) & is.na(data$LID_KB)
+print(data[rows_with_missing_drugs, ])
 ```
 
 ```{r multicollinearity, echo=FALSE, warning=FALSE}
