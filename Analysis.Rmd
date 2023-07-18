@@ -101,6 +101,7 @@ print(data[rows_with_missing_drugs, ])
 # write.csv(imputed_data_hospital_admit, "./imputed_hospital_admit.csv", row.names=FALSE)
 # write.csv(imputed_data_ICU_admit, "./imputed_ICU_admit.csv", row.names=FALSE)
 # write.csv(imputed_data_ICU_stay, "./imputed_ICU_stay.csv", row.names=FALSE)
+# write.csv(imputed_data, "./imputed_full.csv", row.names=FALSE)
 
 #using data from csv so don't need to do imputation again
 imputed_data_admission <- read.csv('imputed_admission.csv')
@@ -109,6 +110,8 @@ imputed_data_anamnesis <- read.csv('imputed_anamnesis.csv')
 imputed_data_hospital_admit <- read.csv('imputed_hospital_admit.csv')
 imputed_data_ICU_admit <- read.csv('imputed_ICU_admit.csv')
 imputed_data_ICU_stay <- read.csv('imputed_ICU_stay.csv')
+imputed_data <- read.csv('imputed_full.csv')
+imputed_data_ect <- read.csv('imputed_ect.csv')
 
 change_sex <- function(data){
   data <- data %>% mutate(SEX = case_when(SEX == 'Female' ~ 0, SEX == 'Male' ~ 1))
@@ -441,7 +444,7 @@ summary(bfit.HospitalAdmit)
 #   return(fit)
 # }
 
-X <- imputed_data_admission2
+X <- imputed_data_admission
 y <- imputed_data_admission$REC_IM
 X <- as.matrix(X)
 
@@ -464,50 +467,50 @@ print(coef(fit))
   #   outcome saved in a vector object;
   #   covariates saved in a matrix object (not a data frame!) and only include
   #   covariates to be considered in selection
-  cbind(1:length(data),names(comp)) 
-  
-  # - Run into issues with factor variable; need to convert to dummy variables
-  yy <- comp[,"High_HDL"]
-  xx <- as.matrix(comp[,c(3:15)])
-  yy[1:6]
-  head(xx)
-  
-  # - Create dummay variables for BMI_WHO
-  xx <- model.matrix(fit.full)
-  head(xx)
-  
-  # - Drop intercept (don't want to enter twice)
-  xx <- xx[,-1]
-  head(xx)
-  
-  # - Use glmnet() function to get solutions path plot; 
-  #   because glmnet() fits both LASSO and Ridge regression, use alpha 
-  #   argument to specify which penalty to use (alpha = 1 --> LASSO)
-  fit.lasso <- glmnet(xx, yy, alpha=1, standardize=TRUE, family = 'binomial')
-  plot(fit.lasso, label=TRUE, xvar="lambda")
-  cbind(1:15,colnames(xx))
-  
-  # - Hack to see lines bunched ... zoom-in by control range of y-axis
-  plot(fit.lasso, label=TRUE, xvar="lambda",
-       ylim = c(0.02,-0.02))
-  
-  # - Use cv.glment() function to perform k-fold cross validation
-  #   to select the final model; need to set the seed so random 
-  #   can be reproduced each time code is run
-  set.seed(823)
-  cv.lasso <- cv.glmnet(xx, yy, alpha=1, standardize=TRUE, nfolds=10, family = 'binomial')
-  plot(cv.lasso)
-  
-  # - Value of lamda that minimizes MSPE: 
-  cv.lasso$lambda.min; log(cv.lasso$lambda.min)
-  cv.lasso$lambda.1se; log(cv.lasso$lambda.1se)
-  
-  # - Regression coefficients for selected model
-  lasso.coef <- coef(cv.lasso, s=cv.lasso$lambda.min)
-  lasso.coef
-  
-  lasso.coef <- coef(cv.lasso, s=cv.lasso$lambda.1se)
-  lasso.coef
+  # cbind(1:length(data),names(comp)) 
+  # 
+  # # - Run into issues with factor variable; need to convert to dummy variables
+  # yy <- comp[,"High_HDL"]
+  # xx <- as.matrix(comp[,c(3:15)])
+  # yy[1:6]
+  # head(xx)
+  # 
+  # # - Create dummay variables for BMI_WHO
+  # xx <- model.matrix(fit.full)
+  # head(xx)
+  # 
+  # # - Drop intercept (don't want to enter twice)
+  # xx <- xx[,-1]
+  # head(xx)
+  # 
+  # # - Use glmnet() function to get solutions path plot; 
+  # #   because glmnet() fits both LASSO and Ridge regression, use alpha 
+  # #   argument to specify which penalty to use (alpha = 1 --> LASSO)
+  # fit.lasso <- glmnet(xx, yy, alpha=1, standardize=TRUE, family = 'binomial')
+  # plot(fit.lasso, label=TRUE, xvar="lambda")
+  # cbind(1:15,colnames(xx))
+  # 
+  # # - Hack to see lines bunched ... zoom-in by control range of y-axis
+  # plot(fit.lasso, label=TRUE, xvar="lambda",
+  #      ylim = c(0.02,-0.02))
+  # 
+  # # - Use cv.glment() function to perform k-fold cross validation
+  # #   to select the final model; need to set the seed so random 
+  # #   can be reproduced each time code is run
+  # set.seed(823)
+  # cv.lasso <- cv.glmnet(xx, yy, alpha=1, standardize=TRUE, nfolds=10, family = 'binomial')
+  # plot(cv.lasso)
+  # 
+  # # - Value of lamda that minimizes MSPE: 
+  # cv.lasso$lambda.min; log(cv.lasso$lambda.min)
+  # cv.lasso$lambda.1se; log(cv.lasso$lambda.1se)
+  # 
+  # # - Regression coefficients for selected model
+  # lasso.coef <- coef(cv.lasso, s=cv.lasso$lambda.min)
+  # lasso.coef
+  # 
+  # lasso.coef <- coef(cv.lasso, s=cv.lasso$lambda.1se)
+  # lasso.coef
     
 }
 
