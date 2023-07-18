@@ -110,6 +110,7 @@ imputed_data_anamnesis <- read.csv('imputed_anamnesis.csv')
 imputed_data_hospital_admit <- read.csv('imputed_hospital_admit.csv')
 imputed_data_ICU_admit <- read.csv('imputed_ICU_admit.csv')
 imputed_data_ICU_stay <- read.csv('imputed_ICU_stay.csv')
+imputed_data_ICU_all <- merge(imputed_data_ICU_admit,imputed_data_ICU_stay, by = "REC_IM")
 imputed_data <- read.csv('imputed_full.csv')
 imputed_data_ect <- read.csv('imputed_ect.csv')
 
