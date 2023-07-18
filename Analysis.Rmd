@@ -106,8 +106,7 @@ print(data[rows_with_missing_drugs, ])
 # write.csv(imputed_data_stay, "./imputed_stay.csv", row.names=FALSE)
 # write.csv(imputed_data_anamnesis, "./imputed_amanesis.csv", row.names=FALSE)
 # write.csv(imputed_data_hospital_admit, "./imputed_hospital_admit.csv", row.names=FALSE)
-# write.csv(imputed_data_ICU_admit, "./imputed_ICU_admit.csv", row.names=FALSE)
-# write.csv(imputed_data_ICU_stay, "./imputed_ICU_stay.csv", row.names=FALSE)
+#write.csv(imputed_data_ICU_all, "./imputed_ICU_all.csv", row.names=FALSE)
 # write.csv(imputed_data, "./imputed_full.csv", row.names=FALSE)
 
 # Using data from csv to avoid rerunning imputation
@@ -115,8 +114,7 @@ imputed_data_admission <- read.csv('imputed_admission.csv')
 imputed_data_stay <- read.csv('imputed_stay.csv')
 imputed_data_anamnesis <- read.csv('imputed_anamnesis.csv')
 imputed_data_hospital_admit <- read.csv('imputed_hospital_admit.csv')
-imputed_data_ICU_admit <- read.csv('imputed_ICU_admit.csv')
-imputed_data_ICU_stay <- read.csv('imputed_ICU_stay.csv')
+imputed_data_ICU_all <- read.csv('imputed_ICU_all.csv')
 imputed_data <- read.csv('imputed_full.csv')
 imputed_data_ect <- read.csv('imputed_ect.csv')
 
@@ -378,6 +376,24 @@ summary(ffit.HospitalAdmit)
 # n_p_ecg_p_11 + n_r_ecg_p_03 + n_r_ecg_p_04 + n_p_ecg_p_08 + n_p_ecg_p_09 + 
 # n_p_ecg_p_03
 # 11 variables, AIC = 1037.3
+
+# FORWARD SELECTION (ECT)
+start.ECT <- glm(REC_IM ~ 1 , data = imputed_data_ect, family = 'binomial')
+
+stop.ECT<- formula(glm(REC_IM ~ ., data = imputed_data_ect, 
+                           family = 'binomial'))
+
+alpha.crit <- 0.2
+ffit.ECT <- stats::step(start.ECT,
+             scope=stop.ECT,
+             direction="forward",
+             trace=0,
+             test="F",
+             k=qchisq(1-alpha.crit,1))
+
+summary(ffit.ECT)
+# .id + D_AD_KBRIG + NOT_NA_KB
+# AIC = 274.89
 ```
 
 ```{r, backward-selection warning=FALSE}
@@ -405,28 +421,27 @@ summary(bfit.anamnesis)
 
 # --------------------------------------------------
 
-# backwards selection ICU admit
-model.ICUadmit <- glm(REC_IM ~.,data=imputed_data_ICU_admit,family='binomial')
+# backwards selection ICU all
+model.ICUall <- glm(REC_IM ~.,data=imputed_data_ICU_all,family='binomial')
 
-bfit.ICUadmit <- model.ICUadmit %>% stepAIC(direction='backward',trace=FALSE)
-summary(bfit.ICUadmit)
-# D_AD_ORIT, K_SH_POST, GT_POST, inf_im, IM_PG_P
+bfit.ICUall <- model.ICUall %>% stepAIC(direction='backward',trace=FALSE)
+summary(bfit.ICUall)
+# D_AD_ORIT, GT_POST , inf_im , ANT_CA_S_n , GEPAR_S_n + TRENT_S_n + R_AB_3_n , NA_R_1_n + NA_R_2_n
 # AIC: 1048.8
-
-# --------------------------------------------------
-
-# backwards selection ICU stay - same as forward
-model.ICUstay <- glm(REC_IM ~.,data=imputed_data_ICU_stay,family='binomial')
-
-bfit.ICUstay <- model.ICUstay %>% stepAIC(direction='backward',trace=FALSE)
-summary(bfit.ICUstay)
-# ANT_CA_S_n, GEPAR_S_, TRENT_S_n, R_AB_3_n, NA_R_1_n, NA_R_2_n
-# AIC: 1019.6
 
 # --------------------------------------------------
 
 # backwards selection hospital admit
 model.HospitalAdmit <- glm(REC_IM ~.,data=imputed_data_hospital_admit,family='binomial')
+
+bfit.HospitalAdmit <- model.HospitalAdmit %>% stepAIC(direction='backward',trace=FALSE)
+summary(bfit.HospitalAdmit)
+#  model variables: TIME_B_S2 through TIME_B_S9, L_BLOOD, ritm_ecg_p_07, n_p_ecg_p_08, n_p_ecg_p_09, n_r_ecg_03, n_r_ecg_04, n_r_ecg_p_06
+# AIC:1040.8 - same AIC as forward
+# --------------------------------------------------
+
+# backwards selection ECT
+model.ECT <- glm(REC_IM ~.,data=imputed_ECT,family='binomial')
 
 bfit.HospitalAdmit <- model.HospitalAdmit %>% stepAIC(direction='backward',trace=FALSE)
 summary(bfit.HospitalAdmit)
