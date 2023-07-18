@@ -24,12 +24,12 @@ data <- read.csv('MICD.csv')
 
 superdata <- data
 
-# superdata <- superdata %>%
-#   mutate(AGE_GROUP = case_when(AGE >= 25 & AGE <= 34 ~ '25-34', AGE >= 35 & AGE <= 44 ~ '35-44', AGE >= 45 & AGE <= 54 ~ '45-54', AGE >= 55  & AGE <= 64 ~ '55-64', AGE >= 65 & AGE <= 74 ~ '65-74', AGE >= 75 & AGE <= 84 ~ '75-84', AGE >= 85 ~ '85+')) %>%
-#   mutate(SEX = case_when(SEX == 0 ~ 'Female', SEX == 1 ~ 'Male')) %>%
-#   relocate(AGE_GROUP, .after = AGE) %>%
-#   dplyr::select(- c(IBS_NASL, KFK_BLOOD, S_AD_KBRIG, D_AD_KBRIG, NOT_NA_KB, LID_KB, NA_KB, FIBR_PREDS, PREDS_TAH, JELUD_TAH, FIBR_JELUD, A_V_BLOK, OTEK_LANC, RAZRIV, DRESSLER, ZSN, P_IM_STEN, LET_IS))
-# 
+superdata <- superdata %>%
+  mutate(AGE_GROUP = case_when(AGE >= 25 & AGE <= 34 ~ '25-34', AGE >= 35 & AGE <= 44 ~ '35-44', AGE >= 45 & AGE <= 54 ~ '45-54', AGE >= 55  & AGE <= 64 ~ '55-64', AGE >= 65 & AGE <= 74 ~ '65-74', AGE >= 75 & AGE <= 84 ~ '75-84', AGE >= 85 ~ '85+')) %>%
+  mutate(SEX = case_when(SEX == 0 ~ 'Female', SEX == 1 ~ 'Male')) %>%
+  relocate(AGE_GROUP, .after = AGE) %>%
+  dplyr::select(- c(IBS_NASL, KFK_BLOOD, S_AD_KBRIG, D_AD_KBRIG, NOT_NA_KB, LID_KB, NA_KB, FIBR_PREDS, PREDS_TAH, JELUD_TAH, FIBR_JELUD, A_V_BLOK, OTEK_LANC, RAZRIV, DRESSLER, ZSN, P_IM_STEN, LET_IS))
+
 # # Factoring ordinal variables
 # superdata$FK_STENOK = as.factor(superdata$FK_STENOK)
 # superdata$IBS_POST = as.factor(superdata$IBS_POST)
@@ -100,6 +100,13 @@ imputed_data_anamnesis <- read.csv('imputed_anamnesis.csv')
 imputed_data_hospital_admit <- read.csv('imputed_hospital_admit.csv')
 imputed_data_ICU_admit <- read.csv('imputed_ICU_admit.csv')
 imputed_data_ICU_stay <- read.csv('imputed_ICU_stay.csv')
+
+change_sex <- function(data){
+  data <- data %>% mutate(SEX = case_when(SEX == 'Female' ~ 0, SEX == 'Male' ~ 1))
+}
+
+imputed_data_admission <- change_sex(imputed_data_admission)
+imputed_data_anamnesis <- change_sex(imputed_data_anamnesis)
 
 # Without removing ritm_ecg_p_01, MC in ritm_ecg_p_01, 02, 04, 07, 08. No MC after removal.
 # imputed_data_admission = imputed_data_admission %>%
@@ -409,25 +416,37 @@ summary(bfit.HospitalAdmit)
 
 ```{r lasso_regression, echo=FALSE, warning=FALSE}
 
-my_function <- function(X, y, alpha = 1, lambda = NULL) {
-  
-  X <- as.matrix(X)
-  
-  if(is.null(lambda)) {
-    lambda <- glmnet::cv.glmnet(X, y, alpha = alpha, family = 'binomial')$lambda
+# my_function <- function(X, y, alpha = 1, lambda = NULL) {
+#   
+#   X <- as.matrix(X)
+#   
+#   cv.lasso <- glmnet::cv.glmnet(X, y, alpha = alpha, standardize = TRUE, nfolds = 5)
+#   plot(cv.lasso)
+#   
+#   if (is.null(lambda)) {
+#     lambda <- cv.lasso$lambda.min
+#   }
+#   
+#   fit <- glmnet::glmnet(X, y, alpha = alpha, lambda = lambda, family = 'binomial')
+#   
+#   return(fit)
+# }
 
-  }
-  
-  fit <- glmnet::glmnet(X, y, alpha = alpha, lambda = lambda, family = 'binomial')
-  
-  return(fit)
-  
-}
+X <- imputed_data_admission2
+y <- imputed_data_admission$REC_IM
+X <- as.matrix(X)
 
-imputed_data_admission2 = imputed_data_admission %>%
-  dplyr::select(-c(REC_IM))
+fit <- glmnet::glmnet(X, y, alpha = 1, family = 'binomial')
+  
+cv.lasso <- glmnet::cv.glmnet(X, y, alpha = 1, standardize = TRUE, nfolds = 5)
+plot(cv.lasso)
+  
+lambda <- cv.lasso$lambda.min
+  
+# fit <- my_function(imputed_data_admission2, imputed_data_admission$REC_IM)
 
-my_function(imputed_data_admission2, imputed_data_admission$REC_IM)
+print(coef(fit))
+
 
   # - Use LASSO to build prediction model
   
