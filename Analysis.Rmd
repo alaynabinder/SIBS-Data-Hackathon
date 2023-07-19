@@ -19,7 +19,9 @@ library(car)
 library(MASS) # backward selection
 library(bestglm)
 library(glmnet) # LASSO
+library(pander)
 data <- read.csv('MICD.csv')
+# pander(data)
 ```
 
 ```{r imputing_data, echo=FALSE, warning=FALSE}
@@ -749,6 +751,7 @@ test_data <- subset(imputed_data_admission, split == FALSE)
 
 final_fit_admission <- glm(REC_IM ~ lat_im + ANT_CA_S_n + nr_03 + GIPER_NA + L_BLOOD + STENOK_AN + n_p_ecg_p_03 + n_r_ecg_p_09 + K_SH_POST + zab_leg_01 + FIB_G_POST + endocr_01 + NITR_S + GEPAR_S_n + IBS_POST + TRENT_S_n + n_p_ecg_p_11 + AGE + np_01 + n_r_ecg_p_06 + np_10 + ritm_ecg_p_02, data = imputed_data_admission, family = 'binomial')
 summary(final_fit_admission)
+pander(summary(final_fit_admission))
 
 # --- To get estimates on odds scale, must exponentiate
 exp(final_fit_admission$coef)
