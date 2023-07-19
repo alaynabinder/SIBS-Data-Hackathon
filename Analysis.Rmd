@@ -540,6 +540,7 @@ head(xx)
 
 fit.lasso <- glmnet(xx, yy, alpha=1, standardize=TRUE)
 plot(fit.lasso, label=TRUE, xvar="lambda")
+(main = 'LASSO Regression for General Admission', line=3)
 cbind(1:94,colnames(xx))
 
 set.seed(12345)
@@ -563,6 +564,7 @@ head(xx)
 
 fit.lasso <- glmnet(xx, yy, alpha=1, standardize=TRUE)
 plot(fit.lasso, label=TRUE, xvar="lambda")
+(main = 'LASSO Regression for General Stay', line=3)
 cbind(1:9,colnames(xx))
 
 set.seed(12345)
@@ -586,6 +588,7 @@ head(xx)
 
 fit.lasso <- glmnet(xx, yy, alpha=1, standardize=TRUE)
 plot(fit.lasso, label=TRUE, xvar="lambda")
+title(main = 'LASSO Regression for ECT', line=3)
 cbind(1:5,colnames(xx))
 
 set.seed(12345)
@@ -609,6 +612,7 @@ head(xx)
 
 fit.lasso <- glmnet(xx, yy, alpha=1, standardize=TRUE)
 plot(fit.lasso, label=TRUE, xvar="lambda")
+title(main = 'LASSO Regression for Anamnesis', line=3)
 cbind(1:30,colnames(xx))
 
 set.seed(12345)
@@ -641,6 +645,7 @@ head(xx)
 
 fit.lasso <- glmnet(xx, yy, alpha=1, standardize=TRUE)
 plot(fit.lasso, label=TRUE, xvar="lambda")
+title(main = 'LASSO Regression for Hospital Admission', line=3)
 cbind(1:41,colnames(xx))
 
 set.seed(12345)
@@ -669,7 +674,7 @@ head(xx)
 
 fit.lasso <- glmnet(xx, yy, alpha=1, standardize=TRUE)
 plot(fit.lasso, label=TRUE, xvar="lambda")
-title(main="LASSO Regression for All ICU Data", line=3)
+title(main="LASSO Regression for ICU", line=3)
 cbind(1:30,colnames(xx))
 
 set.seed(12345)
@@ -731,7 +736,7 @@ as.vector(lasso.coef)
 
 ```
 
-```{r final_models, echo=FALSE, warning=FALSE}
+```{r final_model_ADMISSION, echo=FALSE, warning=FALSE}
 
 # ADMISSION
 library(caTools)
@@ -765,6 +770,9 @@ print(paste("AUC:", auc))
 # Generate ROC curve plot
 plot(roc_obj, main = "ROC Curve", xlab = "False Positive Rate", ylab = "True Positive Rate")
 
+```
+
+```{r final_model_STAY, echo=FALSE, warning=FALSE}
 
 # STAY
 
@@ -798,6 +806,5 @@ plot(roc_obj, main = "ROC Curve", xlab = "False Positive Rate", ylab = "True Pos
 
 # Assess the model using the summary
 summary(final_fit_stay)
-
 
 ```
