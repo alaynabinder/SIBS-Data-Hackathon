@@ -812,7 +812,7 @@ prop.table(table(imputed_data_admission$dec_grp))         # Proportion of observ
 
 # --- Compute mean predicted probability and event rate by decile group
 agg <- aggregate(cbind(REC_IM,p.hats) ~ dec_grp, # Aggregate A,B by C
-                 data = imputed_data_admision,                  # From data set
+                 data = imputed_data_admission,                  # From data set
                  FUN = 'mean')                # Using this summary function 
 agg
 
@@ -852,7 +852,10 @@ ggplot(imputed_data_admission,                           # Data set to pull vari
            fill=as.factor(REC_IM))) +    # Variable to stratify by (has to be a factor)
 geom_density(alpha = 0.2) +           # Transparency of plotting colors 
 scale_fill_manual(                    # Set plotting colors
-  values=c("orangered", "royalblue"))
+  values=c("orangered", "royalblue"), name="Relapse of\nMI",
+                       breaks=c("0", "1"),
+                       labels=c("No", "Yes")) +
+  labs(title='Density of Predictions for Relapse of MI', y='Density', x='Predictions')
 
 library(pROC)  # For ROC curve and AUC
 
@@ -889,6 +892,113 @@ test_data <- subset(imputed_data_stay, split == FALSE)
 
 final_fit_stay <- glm(REC_IM ~ R_AB_3_n + NA_R_1_n + NA_R_2_n + NA_R_3_n, data = imputed_data_stay, family = 'binomial')
 summary(final_fit_stay)
+
+# --- To get estimates on odds scale, must exponentiate
+exp(final_fit_stay$coef)
+exp(confint.default(final_fit_stay))
+
+# ----------------------------------------------------------------------
+# - Get predicted probabilities of BPD
+
+p.hats <- predict(final_fit_stay,type='response')
+
+# --- Check computation of p.hats for first observation 
+head(imputed_data_stay)
+
+# ----- With rounding errors ... 
+# xbeta <- 4.0342913 + (-0.0042291*850)   # Manually compute linear predictor 
+# p.x <- exp(xbeta)/(1+exp(xbeta)); p.x   # Manually compute P(Y=1|X)
+# p.hats[1]                               # Compare to output from predict()  
+
+result <- c(1)  # Initialize the result vector with the first element as 1
+
+for (i in 2:length(final_fit_stay$coef)){
+  result <- c(result, final_fit_stay$coef[[i]][1])
+}
+
+# ----- Without rounding errors ... 
+xbeta <- result %*% final_fit_stay$coef          # Manually compute linear predictor 
+p.x <- exp(xbeta)/(1+exp(xbeta)); p.x   # Manually compute P(Y=1|X)
+p.hats[1]                               # Compare to output from predict() 
+
+# --- Add predicted probabilities to data set
+imputed_data_stay$p.hats <- p.hats
+
+# ----------------------------------------------------------------------
+# - Estimate calibration-in-the-large 
+
+mean(imputed_data_stay$p.hats)        # Mean P(Y=1|X)
+mean(imputed_data_stay$REC_IM)           # Observed P(Y=1)
+
+# ----------------------------------------------------------------------
+# - Create calibration plot  
+
+# --- Summarize predicted probabilities
+summary(imputed_data_stay$p.hats)
+hist(imputed_data_stay$p.hats)
+
+# --- Compute deciles of predicted probabilities
+dec <- quantile(imputed_data_stay$p.hats,            # Variable to be summarized
+                probs=seq(0,1,by=0.10), # Vector of percentile values 
+                type=3)                # Use same algorithm as SAS
+dec 
+
+# --- Create decile group variable 
+imputed_data_stay$dec_grp <- cut(imputed_data_stay$p.hats,         # Predicted probabilities (var to group)
+                   breaks = dec,       # Cut points (group intervals)
+                   include.lowest = T, # Include smallest value 
+                   labels = 1:10)      # Labels for groups
+
+# ----- Check that decile groups created correctly 
+table(imputed_data_stay$dec_grp)                     # Number of observations in each decile group
+prop.table(table(imputed_data_stay$dec_grp))         # Proportion of observations in each decile group
+
+# --- Compute mean predicted probability and event rate by decile group
+agg <- aggregate(cbind(REC_IM,p.hats) ~ dec_grp, # Aggregate A,B by C
+                 data = imputed_data_stay,                  # From data set
+                 FUN = 'mean')                # Using this summary function 
+agg
+
+# ----- Check computations for decile group 5
+mean(imputed_data_stay$REC_IM[imputed_data_stay$dec_grp == 5])
+mean(imputed_data_stay$p.hats[imputed_data_stay$dec_grp == 5])
+
+# --- Create calibration plot 
+plot(agg$p.hats,                         # x-coor = mean pred prob in dec group
+     agg$REC_IM,                            # y-coor = obs event rate in dec group
+     main = 'Calibration Plot',          # Add main title 
+     ylab = 'Observed Event Rate',       # Add y-axis label
+     xlab = 'Predicted Probabilities',   # Add x-axis label
+     pch = 19,                           # Plotting character = solid dot
+     col = 'orangered',                  # Color of plotting character 
+     cex = 2)                            # Size of plotting character (base = 1)
+
+                                         # Add identity line
+abline(a = 0,                            # a = intercept 
+       b = 1)                            # b = slope
+
+                                        # Add fitted regression line
+cal.fit <- lm(REC_IM ~ p.hats, data = agg) # Fit linear model to plot data 
+abline(cal.fit,                         # Using intercept and slope from linear model fit
+       lty = 2,                         # Dashed line
+       col = 'royalblue',               # Color of plotting line
+       lwd = 3)                         # Thickness of plotting line (base = 1)
+
+summary(cal.fit)                        # Compute calibration intercept and slope
+confint(cal.fit)                        # Compute  95% confidence intervals
+
+# ----------------------------------------------------------------------
+# - Plot density of predicted probabilities by event status
+
+ggplot(imputed_data_stay,                           # Data set to pull variables from 
+       aes(p.hats,                    # Variable density to plot 
+           fill=as.factor(REC_IM))) +    # Variable to stratify by (has to be a factor)
+geom_density(alpha = 0.2) +           # Transparency of plotting colors 
+scale_fill_manual(                    # Set plotting colors
+  values=c("orangered", "royalblue"), name="Relapse of\nMI",
+                       breaks=c("0", "1"),
+                       labels=c("No", "Yes")) +
+  labs(title='Density of Predictions for Relapse of MI', y='Density', x='Predictions')
 
 # Make predictions on the test data
 predictions <- predict(final_fit_stay, newdata = test_data, type = "response")
