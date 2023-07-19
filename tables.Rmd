@@ -1,0 +1,49 @@
+---
+output: pdf_document
+---
+
+```{r tables, warning=FALSE, echo=FALSE, message=FALSE}
+
+library(tidyverse)
+library(tidymodels)
+library(tidycat)
+library(pander)
+
+```
+
+```{r admission, echo=FALSE, warning=FALSE, message=FALSE}
+
+# ADMISSION
+
+imputed_data_admission = read.csv('imputed_admission.csv')
+
+# Changing character sex back into numerical sex
+change_sex <- function(data){
+  data <- data %>% mutate(SEX = case_when(SEX == 'Female' ~ 0, SEX == 'Male' ~ 1))
+}
+imputed_data_admission <- change_sex(imputed_data_admission)
+
+final_fit_admission <- glm(REC_IM ~ lat_im + ANT_CA_S_n + nr_03 + GIPER_NA + L_BLOOD + STENOK_AN + n_p_ecg_p_03 + n_r_ecg_p_09 + K_SH_POST + zab_leg_01 + FIB_G_POST + endocr_01 + NITR_S + GEPAR_S_n + IBS_POST + TRENT_S_n + n_p_ecg_p_11 + AGE + np_01 + n_r_ecg_p_06 + np_10 + ritm_ecg_p_02, data = imputed_data_admission, family = 'binomial')
+
+panderOptions('round',3)
+panderOptions('digits',7)
+panderOptions('keep.trailing.zeros',TRUE)
+pander(summary(final_fit_admission))
+
+```
+
+```{r stay, echo=FALSE, warning=FALSE, message=FALSE}
+
+# STAY
+
+imputed_data_stay <- read.csv('imputed_stay.csv')
+
+final_fit_stay <- glm(REC_IM ~ R_AB_3_n + NA_R_1_n + NA_R_2_n + NA_R_3_n, data = imputed_data_stay, family = 'binomial')
+summary(final_fit_stay)
+
+panderOptions('round',3)
+panderOptions('digits',7)
+panderOptions('keep.trailing.zeros',TRUE)
+pander(summary(final_fit_stay))
+
+```
