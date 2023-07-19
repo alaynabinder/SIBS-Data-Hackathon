@@ -448,12 +448,11 @@ summary(bfit.HospitalAdmit)
 # --------------------------------------------------
 
 # backwards selection ECT
-model.ECT <- glm(REC_IM ~.,data=imputed_ECT,family='binomial')
+model.ECT <- glm(REC_IM ~.,data=imputed_data_ect,family='binomial')
 
-bfit.HospitalAdmit <- model.HospitalAdmit %>% stepAIC(direction='backward',trace=FALSE)
-summary(bfit.HospitalAdmit)
-#  model variables: TIME_B_S2 through TIME_B_S9, L_BLOOD, ritm_ecg_p_07, n_p_ecg_p_08, n_p_ecg_p_09, n_r_ecg_03, n_r_ecg_04, n_r_ecg_p_06
-# AIC:1040.8 - same AIC as forward
+bfit.ECT <- model.ECT %>% stepAIC(direction='backward',trace=FALSE)
+summary(bfit.ECT)
+#  model variables: NONE
 
 ```
 
@@ -670,6 +669,7 @@ head(xx)
 
 fit.lasso <- glmnet(xx, yy, alpha=1, standardize=TRUE)
 plot(fit.lasso, label=TRUE, xvar="lambda")
+title(main="LASSO Regression for All ICU Data", line=3)
 cbind(1:30,colnames(xx))
 
 set.seed(12345)
@@ -685,48 +685,62 @@ as.vector(lasso.coef)
 
 # ----------------------------------------------------------------------------
 # IMPUTED_DATA_ICU_ADMIT
+# 
+# yy <- imputed_data_ICU_admit[,'REC_IM']
+# xx <- as.matrix(imputed_data_ICU_admit[,c("S_AD_ORIT", "D_AD_ORIT", "O_L_POST", "K_SH_POST", "MP_TP_POST", "SVT_POST", "GT_POST", "FIB_G_POST", "ant_im", "lat_im", "inf_im", "post_im", "IM_PG_P")])
+# yy[1:1700]
+# head(xx)
+# 
+# fit.lasso <- glmnet(xx, yy, alpha=1, standardize=TRUE)
+# plot(fit.lasso, label=TRUE, xvar="lambda")
+# cbind(1:13,colnames(xx))
+# 
+# set.seed(12345)
+# cv.lasso <- cv.glmnet(xx, yy, alpha=1, standardize=TRUE, nfolds=10)
+# plot(cv.lasso)
+# cv.lasso$lambda.min; log(cv.lasso$lambda.min)
+# 
+# lasso.coef <- coef(cv.lasso, s=cv.lasso$lambda.min)
+# lasso.coef
+# as.vector(lasso.coef)
+# 
+# ## Important variables: D_AD_ORIT + K_SH_POST + SVT_POST + GT_POST + FIB_G_POST + ant_im + lat_im + inf_im + post_im + IM_PG_P
+# 
+# # ----------------------------------------------------------------------------
+# # IMPUTED_DATA_ICU_STAY
+# 
+# yy <- imputed_data_ICU_stay[,'REC_IM']
+# xx <- as.matrix(imputed_data_ICU_stay[,c("NITR_S", "LID_S_n", "B_BLOK_S_n", "ANT_CA_S_n", "GEPAR_S_n",  "ASP_S_n", "TIKL_S_n", "TRENT_S_n", "R_AB_1_n", "R_AB_2_n", "R_AB_3_n",  "NA_R_1_n", "NA_R_2_n", "NA_R_3_n", "NOT_NA_1_n", "NOT_NA_2_n", "NOT_NA_3_n")])
+# yy[1:1700]
+# head(xx)
+# 
+# fit.lasso <- glmnet(xx, yy, alpha=1, standardize=TRUE)
+# plot(fit.lasso, label=TRUE, xvar="lambda")
+# cbind(1:17,colnames(xx))
+# 
+# set.seed(12345)
+# cv.lasso <- cv.glmnet(xx, yy, alpha=1, standardize=TRUE, nfolds=10)
+# plot(cv.lasso)
+# cv.lasso$lambda.min; log(cv.lasso$lambda.min)
+# 
+# lasso.coef <- coef(cv.lasso, s=cv.lasso$lambda.min)
+# lasso.coef
+# as.vector(lasso.coef)
+# 
+# ## Important variables: NITR_S + LID_S_n + ANT_CA_S_n + GEPAR_S_n + ASP_S_n + TIKL_S_n + TRENT_S_n + R_AB_3_n + NA_R_1_n + NA_R_2_n + NA_R_3_n + NOT_NA_2_n + NOT_NA_3_n
 
-yy <- imputed_data_ICU_admit[,'REC_IM']
-xx <- as.matrix(imputed_data_ICU_admit[,c("S_AD_ORIT", "D_AD_ORIT", "O_L_POST", "K_SH_POST", "MP_TP_POST", "SVT_POST", "GT_POST", "FIB_G_POST", "ant_im", "lat_im", "inf_im", "post_im", "IM_PG_P")])
-yy[1:1700]
-head(xx)
+```
 
-fit.lasso <- glmnet(xx, yy, alpha=1, standardize=TRUE)
-plot(fit.lasso, label=TRUE, xvar="lambda")
-cbind(1:13,colnames(xx))
+```{r final_models, echo=FALSE, warning=FALSE}
 
-set.seed(12345)
-cv.lasso <- cv.glmnet(xx, yy, alpha=1, standardize=TRUE, nfolds=10)
-plot(cv.lasso)
-cv.lasso$lambda.min; log(cv.lasso$lambda.min)
+# ADMISSION
 
-lasso.coef <- coef(cv.lasso, s=cv.lasso$lambda.min)
-lasso.coef
-as.vector(lasso.coef)
+final_fit_admission <- glm(REC_IM ~ lat_im + ANT_CA_S_n + nr_03 + GIPER_NA + L_BLOOD + STENOK_AN + n_p_ecg_p_03 + n_r_ecg_p_09 + K_SH_POST + zab_leg_01 + FIB_G_POST + endocr_01 + NITR_S + GEPAR_S_n + IBS_POST + TRENT_S_n + n_p_ecg_p_11 + AGE + np_01 + n_r_ecg_p_06 + np_10 + ritm_ecg_p_02, data = imputed_data_admission, family = 'binomial')
+summary(final_fit_admission)
 
-## Important variables: D_AD_ORIT + K_SH_POST + SVT_POST + GT_POST + FIB_G_POST + ant_im + lat_im + inf_im + post_im + IM_PG_P
+# STAY
 
-# ----------------------------------------------------------------------------
-# IMPUTED_DATA_ICU_STAY
-
-yy <- imputed_data_ICU_stay[,'REC_IM']
-xx <- as.matrix(imputed_data_ICU_stay[,c("NITR_S", "LID_S_n", "B_BLOK_S_n", "ANT_CA_S_n", "GEPAR_S_n",  "ASP_S_n", "TIKL_S_n", "TRENT_S_n", "R_AB_1_n", "R_AB_2_n", "R_AB_3_n",  "NA_R_1_n", "NA_R_2_n", "NA_R_3_n", "NOT_NA_1_n", "NOT_NA_2_n", "NOT_NA_3_n")])
-yy[1:1700]
-head(xx)
-
-fit.lasso <- glmnet(xx, yy, alpha=1, standardize=TRUE)
-plot(fit.lasso, label=TRUE, xvar="lambda")
-cbind(1:17,colnames(xx))
-
-set.seed(12345)
-cv.lasso <- cv.glmnet(xx, yy, alpha=1, standardize=TRUE, nfolds=10)
-plot(cv.lasso)
-cv.lasso$lambda.min; log(cv.lasso$lambda.min)
-
-lasso.coef <- coef(cv.lasso, s=cv.lasso$lambda.min)
-lasso.coef
-as.vector(lasso.coef)
-
-## Important variables: NITR_S + LID_S_n + ANT_CA_S_n + GEPAR_S_n + ASP_S_n + TIKL_S_n + TRENT_S_n + R_AB_3_n + NA_R_1_n + NA_R_2_n + NA_R_3_n + NOT_NA_2_n + NOT_NA_3_n
+final_fit_stay <- glm(REC_IM ~ R_AB_3_n + NA_R_1_n + NA_R_2_n, data = imputed_data_stay, family = 'binomial')
+summary(final_fit_stay)
 
 ```
