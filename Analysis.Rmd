@@ -930,34 +930,29 @@ imputed_data_stay$p.hats <- p.hats
 mean(imputed_data_stay$p.hats)        # Mean P(Y=1|X)
 mean(imputed_data_stay$REC_IM)           # Observed P(Y=1)
 
-# ----------------------------------------------------------------------
-# - Create calibration plot  
-
-# --- Summarize predicted probabilities
-summary(imputed_data_stay$p.hats)
-hist(imputed_data_stay$p.hats)
-
 # --- Compute deciles of predicted probabilities
 dec <- quantile(imputed_data_stay$p.hats,            # Variable to be summarized
-                probs=seq(0,1,by=0.10), # Vector of percentile values 
-                type=3)                # Use same algorithm as SAS
-dec 
+                probs = seq(0, 1, by = 0.1),         # Vector of percentile values 
+                type = 3,                            # Use same algorithm as SAS
+                names = FALSE)                       # Do not include names to avoid duplication
+dec <- unique(dec)                                   # Remove duplicate values
 
 # --- Create decile group variable 
 imputed_data_stay$dec_grp <- cut(imputed_data_stay$p.hats,         # Predicted probabilities (var to group)
-                   breaks = dec,       # Cut points (group intervals)
-                   include.lowest = T, # Include smallest value 
-                   labels = 1:10)      # Labels for groups
+                                breaks = dec,                     # Cut points (group intervals)
+                                include.lowest = TRUE,            # Include smallest value 
+                                labels = 1:5                    # Labels for groups
 
 # ----- Check that decile groups created correctly 
 table(imputed_data_stay$dec_grp)                     # Number of observations in each decile group
 prop.table(table(imputed_data_stay$dec_grp))         # Proportion of observations in each decile group
 
 # --- Compute mean predicted probability and event rate by decile group
-agg <- aggregate(cbind(REC_IM,p.hats) ~ dec_grp, # Aggregate A,B by C
-                 data = imputed_data_stay,                  # From data set
-                 FUN = 'mean')                # Using this summary function 
+agg <- aggregate(cbind(REC_IM, p.hats) ~ dec_grp,  # Aggregate A,B by C
+                 data = imputed_data_stay,         # From data set
+                 FUN = 'mean')                     # Using this summary function 
 agg
+
 
 # ----- Check computations for decile group 5
 mean(imputed_data_stay$REC_IM[imputed_data_stay$dec_grp == 5])
