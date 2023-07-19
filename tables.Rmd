@@ -1,5 +1,5 @@
 ---
-output: html_document
+output: pdf_document
 ---
 
 ```{r tables, warning=FALSE, echo=FALSE, message=FALSE}
@@ -50,6 +50,36 @@ pander(summary(final_fit_stay))
 
 ```
 
+```{r icu, echo=FALSE, warning=FALSE, message=FALSE}
+
+# ICU
+
+imputed_data_ICU_all <- read.csv('imputed_ICU_all.csv')
+
+fit_icu_all <- glm(REC_IM ~ D_AD_ORIT + inf_im + GEPAR_S_n + R_AB_3_n + GT_POST + NA_R_2_n + TRENT_S_n + ANT_CA_S_n + NA_R_1_n, data = imputed_data_ICU_all, family = 'binomial')
+summary(fit_icu_all)
+
+panderOptions('round',3)
+panderOptions('digits',7)
+panderOptions('keep.trailing.zeros',TRUE)
+pander(summary(fit_icu_all))
+
+```
+
+```{r ect, echo=FALSE, warning=FALSE, message=FALSE}
+
+imputed_data_ect <- read.csv('imputed_ect.csv')
+
+fit_ect <- glm(REC_IM ~ D_AD_KBRIG + NOT_NA_KB, data = imputed_data_ect, family = 'binomial')
+summary(fit_ect)
+
+panderOptions('round',3)
+panderOptions('digits',7)
+panderOptions('keep.trailing.zeros',TRUE)
+pander(summary(fit_ect))
+
+```
+
 ```{r before-after-imputation-sodium, echo=FALSE, warning=FALSE, message=FALSE}
 
 # Create buckets for na_blood
@@ -91,9 +121,10 @@ proportions_df$after_imputation_freq <- new_col
 
 # Format the table using pander
 # pander(counts_df, caption = "Counts of Patients in Na_Blood Buckets")
-pander(proportions_df, caption = "Proportions of Patients in Na_Blood Buckets")
+pander(proportions_df, caption = "Proportions of Patients in Na_Blood Buckets", add.header = c('Sodium in Serum Measures', 'Before Imputation Frequency', 'After Imputation Frequency'))
 
 ```
+
 ```{r before-after-imputation, echo=FALSE, warning=FALSE, message=FALSE}
 
 # Create buckets for na_blood
