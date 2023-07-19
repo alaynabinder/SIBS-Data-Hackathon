@@ -740,6 +740,7 @@ as.vector(lasso.coef)
 
 # ADMISSION
 library(caTools)
+library(mmpf)
 
 set.seed(123)  # For reproducibility
 split <- sample.split(imputed_data_admission$REC_IM, SplitRatio = 0.7)
@@ -748,6 +749,104 @@ test_data <- subset(imputed_data_admission, split == FALSE)
 
 final_fit_admission <- glm(REC_IM ~ lat_im + ANT_CA_S_n + nr_03 + GIPER_NA + L_BLOOD + STENOK_AN + n_p_ecg_p_03 + n_r_ecg_p_09 + K_SH_POST + zab_leg_01 + FIB_G_POST + endocr_01 + NITR_S + GEPAR_S_n + IBS_POST + TRENT_S_n + n_p_ecg_p_11 + AGE + np_01 + n_r_ecg_p_06 + np_10 + ritm_ecg_p_02, data = imputed_data_admission, family = 'binomial')
 summary(final_fit_admission)
+
+# --- To get estimates on odds scale, must exponentiate
+exp(final_fit_admission$coef)
+exp(confint.default(final_fit_admission))
+
+# ----------------------------------------------------------------------
+# - Get predicted probabilities of BPD
+
+p.hats <- predict(final_fit_admission,type='response')
+
+# --- Check computation of p.hats for first observation 
+head(imputed_data_admission)
+
+# ----- With rounding errors ... 
+# xbeta <- 4.0342913 + (-0.0042291*850)   # Manually compute linear predictor 
+# p.x <- exp(xbeta)/(1+exp(xbeta)); p.x   # Manually compute P(Y=1|X)
+# p.hats[1]                               # Compare to output from predict()  
+
+# ----- Without rounding errors ... 
+xbeta <- c(1,23) %*% final_fit_admission$coef          # Manually compute linear predictor 
+p.x <- exp(xbeta)/(1+exp(xbeta)); p.x   # Manually compute P(Y=1|X)
+p.hats[1]                               # Compare to output from predict() 
+
+# --- Add predicted probabilities to data set
+imputed_data_admission$p.hats <- p.hats
+
+# ----------------------------------------------------------------------
+# - Estimate calibration-in-the-large 
+
+mean(imputed_data_admission$p.hats)        # Mean P(Y=1|X)
+mean(imputed_data_admission$REC_IM)           # Observed P(Y=1)
+
+# ----------------------------------------------------------------------
+# - Create calibration plot  
+
+# --- Summarize predicted probabilities
+summary(imputed_data_admission$p.hats)
+hist(imputed_data_admission$p.hats)
+
+# --- Compute deciles of predicted probabilities
+dec <- quantile(imputed_data_admission$p.hats,            # Variable to be summarized
+                probs=seq(0,1,by=0.1), # Vector of percentile values 
+                type=3)                # Use same algorithm as SAS
+dec 
+
+# --- Create decile group variable 
+imputed_data_admission$dec_grp <- cut(imputed_data_admission$p.hats,         # Predicted probabilities (var to group)
+                   breaks = dec,       # Cut points (group intervals)
+                   include.lowest = T, # Include smallest value 
+                   labels = 1:10)      # Labels for groups
+
+# ----- Check that decile groups created correctly 
+table(imputed_data_admission$dec_grp)                     # Number of observations in each decile group
+prop.table(table(imputed_data_admission$dec_grp))         # Proportion of observations in each decile group
+
+# --- Compute mean predicted probability and event rate by decile group
+agg <- aggregate(cbind(REC_IM,p.hats) ~ dec_grp, # Aggregate A,B by C
+                 data = imputed_data_admision,                  # From data set
+                 FUN = 'mean')                # Using this summary function 
+agg
+
+# ----- Check computations for decile group 5
+mean(imputed_data_admission$REC_IM[imputed_data_admission$dec_grp == 5])
+mean(imputed_data_admission$p.hats[imputed_data_admission$dec_grp == 5])
+
+# --- Create calibration plot 
+plot(agg$p.hats,                         # x-coor = mean pred prob in dec group
+     agg$REC_IM,                            # y-coor = obs event rate in dec group
+     main = 'Calibration Plot',          # Add main title 
+     ylab = 'Observed Event Rate',       # Add y-axis label
+     xlab = 'Predicted Probabilities',   # Add x-axis label
+     pch = 19,                           # Plotting character = solid dot
+     col = 'orangered',                  # Color of plotting character 
+     cex = 2)                            # Size of plotting character (base = 1)
+
+                                         # Add identity line
+abline(a = 0,                            # a = intercept 
+       b = 1)                            # b = slope
+
+                                        # Add fitted regression line
+cal.fit <- lm(REC_IM ~ p.hats, data = agg) # Fit linear model to plot data 
+abline(cal.fit,                         # Using intercept and slope from linear model fit
+       lty = 2,                         # Dashed line
+       col = 'royalblue',               # Color of plotting line
+       lwd = 3)                         # Thickness of plotting line (base = 1)
+
+summary(cal.fit)                        # Compute calibration intercept and slope
+confint(cal.fit)                        # Compute  95% confidence intervals
+
+# ----------------------------------------------------------------------
+# - Plot density of predicted probabilities by event status
+
+ggplot(imputed_data_admission,                           # Data set to pull variables from 
+       aes(p.hats,                    # Variable density to plot 
+           fill=as.factor(REC_IM))) +    # Variable to stratify by (has to be a factor)
+geom_density(alpha = 0.2) +           # Transparency of plotting colors 
+scale_fill_manual(                    # Set plotting colors
+  values=c("orangered", "royalblue"))
 
 library(pROC)  # For ROC curve and AUC
 
