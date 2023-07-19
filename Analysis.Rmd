@@ -767,8 +767,14 @@ head(imputed_data_admission)
 # p.x <- exp(xbeta)/(1+exp(xbeta)); p.x   # Manually compute P(Y=1|X)
 # p.hats[1]                               # Compare to output from predict()  
 
+result <- c(1)  # Initialize the result vector with the first element as 1
+
+for (i in 2:length(final_fit_admission$coef)){
+  result <- c(result, final_fit_admission$coef[[i]][1])
+}
+
 # ----- Without rounding errors ... 
-xbeta <- c(1,23) %*% final_fit_admission$coef          # Manually compute linear predictor 
+xbeta <- result %*% final_fit_admission$coef          # Manually compute linear predictor 
 p.x <- exp(xbeta)/(1+exp(xbeta)); p.x   # Manually compute P(Y=1|X)
 p.hats[1]                               # Compare to output from predict() 
 
