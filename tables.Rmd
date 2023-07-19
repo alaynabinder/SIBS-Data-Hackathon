@@ -1,5 +1,5 @@
 ---
-output: pdf_document
+output: html_document
 ---
 
 ```{r tables, warning=FALSE, echo=FALSE, message=FALSE}
@@ -8,6 +8,8 @@ library(tidyverse)
 library(tidymodels)
 library(tidycat)
 library(pander)
+data <- read.csv('MICD.csv')
+imputed_data <- read.csv('imputed_full.csv')
 
 ```
 
@@ -45,5 +47,94 @@ panderOptions('round',3)
 panderOptions('digits',7)
 panderOptions('keep.trailing.zeros',TRUE)
 pander(summary(final_fit_stay))
+
+```
+
+```{r before-after-imputation-sodium, echo=FALSE, warning=FALSE, message=FALSE}
+
+# Create buckets for na_blood
+num_buckets <- 10
+na_buckets <- cut(data$NA_BLOOD, breaks = seq(110, 160, length.out = num_buckets + 1))
+
+# Count the number of patients in each bucket
+counts <- table(na_buckets)
+
+# Print the counts
+print(counts)
+proportions <- prop.table(counts)
+print(proportions)
+
+
+counts_df <- as.data.frame(counts)
+proportions_df <- as.data.frame(proportions)
+
+print("IMPUTED")
+
+# Create buckets for na_blood
+num_buckets_imputed <- 10
+na_buckets_imputed <- cut(imputed_data$NA_BLOOD, breaks = seq(110, 160, length.out = num_buckets + 1))
+
+# Count the number of patients in each bucket
+counts_imputed <- table(na_buckets_imputed)
+
+# Print the counts
+print(counts_imputed)
+proportions_imputed <- prop.table(counts_imputed)
+print(proportions_imputed)
+
+counts_df_imputed <- as.data.frame(counts_imputed)
+proportions_df_imputed <- as.data.frame(proportions_imputed)
+
+new_col <- proportions_df_imputed[, 2]
+
+proportions_df$after_imputation_freq <- new_col
+
+# Format the table using pander
+# pander(counts_df, caption = "Counts of Patients in Na_Blood Buckets")
+pander(proportions_df, caption = "Proportions of Patients in Na_Blood Buckets")
+
+```
+```{r before-after-imputation, echo=FALSE, warning=FALSE, message=FALSE}
+
+# Create buckets for na_blood
+num_buckets <- 6
+na_buckets <- cut(data$K_BLOOD, breaks = seq(2, 9, length.out = num_buckets + 1))
+
+# Count the number of patients in each bucket
+counts <- table(na_buckets)
+
+# Print the counts
+print(counts)
+proportions <- prop.table(counts)
+print(proportions)
+
+
+counts_df <- as.data.frame(counts)
+proportions_df <- as.data.frame(proportions)
+
+print("IMPUTED")
+
+# Create buckets for na_blood
+num_buckets_imputed <- 6
+na_buckets_imputed <- cut(imputed_data$K_BLOOD, breaks = seq(2, 9, length.out = num_buckets + 1))
+
+# Count the number of patients in each bucket
+counts_imputed <- table(na_buckets_imputed)
+
+# Print the counts
+print(counts_imputed)
+proportions_imputed <- prop.table(counts_imputed)
+print(proportions_imputed)
+
+counts_df_imputed <- as.data.frame(counts_imputed)
+proportions_df_imputed <- as.data.frame(proportions_imputed)
+
+new_col <- proportions_df_imputed[, 2]
+
+proportions_df$after_imputation_freq <- new_col
+
+# Format the table using pander
+# pander(counts_df, caption = "Counts of Patients in Na_Blood Buckets")
+pander(proportions_df, caption = "Proportions of Patients in Na_Blood Buckets")
 
 ```
