@@ -734,13 +734,70 @@ as.vector(lasso.coef)
 ```{r final_models, echo=FALSE, warning=FALSE}
 
 # ADMISSION
+library(caTools)
+
+set.seed(123)  # For reproducibility
+split <- sample.split(imputed_data_admission$REC_IM, SplitRatio = 0.7)
+train_data <- subset(imputed_data_admission, split == TRUE)
+test_data <- subset(imputed_data_admission, split == FALSE)
 
 final_fit_admission <- glm(REC_IM ~ lat_im + ANT_CA_S_n + nr_03 + GIPER_NA + L_BLOOD + STENOK_AN + n_p_ecg_p_03 + n_r_ecg_p_09 + K_SH_POST + zab_leg_01 + FIB_G_POST + endocr_01 + NITR_S + GEPAR_S_n + IBS_POST + TRENT_S_n + n_p_ecg_p_11 + AGE + np_01 + n_r_ecg_p_06 + np_10 + ritm_ecg_p_02, data = imputed_data_admission, family = 'binomial')
 summary(final_fit_admission)
 
+library(pROC)  # For ROC curve and AUC
+
+# Make predictions on the test data
+predictions <- predict(final_fit_admission, newdata = test_data, type = "response")
+
+# Convert the probabilities into class labels (0 or 1) based on a threshold
+threshold <- 0.5
+predicted_classes <- ifelse(predictions >= threshold, 1, 0)
+
+# Calculate accuracy
+accuracy <- sum(predicted_classes == test_data$REC_IM) / length(test_data$REC_IM)
+print(paste("Accuracy:", accuracy))
+
+# Calculate AUC
+roc_obj <- roc(test_data$REC_IM, predictions)
+auc <- auc(roc_obj)
+print(paste("AUC:", auc))
+
+# Generate ROC curve plot
+plot(roc_obj, main = "ROC Curve", xlab = "False Positive Rate", ylab = "True Positive Rate")
+
+
 # STAY
 
-final_fit_stay <- glm(REC_IM ~ R_AB_3_n + NA_R_1_n + NA_R_2_n, data = imputed_data_stay, family = 'binomial')
+set.seed(123)  # For reproducibility
+split <- sample.split(imputed_data_stay$REC_IM, SplitRatio = 0.7)
+train_data <- subset(imputed_data_stay, split == TRUE)
+test_data <- subset(imputed_data_stay, split == FALSE)
+
+
+final_fit_stay <- glm(REC_IM ~ R_AB_3_n + NA_R_1_n + NA_R_2_n + NA_R_3_n, data = imputed_data_stay, family = 'binomial')
 summary(final_fit_stay)
+
+# Make predictions on the test data
+predictions <- predict(final_fit_stay, newdata = test_data, type = "response")
+
+# Convert the probabilities into class labels (0 or 1) based on a threshold
+threshold <- 0.5
+predicted_classes <- ifelse(predictions >= threshold, 1, 0)
+
+# Calculate accuracy
+accuracy <- sum(predicted_classes == test_data$REC_IM) / length(test_data$REC_IM)
+print(paste("Accuracy:", accuracy))
+
+# Calculate AUC
+roc_obj <- roc(test_data$REC_IM, predictions)
+auc <- auc(roc_obj)
+print(paste("AUC:", auc))
+
+# Generate ROC curve plot
+plot(roc_obj, main = "ROC Curve", xlab = "False Positive Rate", ylab = "True Positive Rate")
+
+# Assess the model using the summary
+summary(final_fit_stay)
+
 
 ```
