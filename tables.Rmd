@@ -121,7 +121,8 @@ proportions_df$after_imputation_freq <- new_col
 
 # Format the table using pander
 # pander(counts_df, caption = "Counts of Patients in Na_Blood Buckets")
-pander(proportions_df, caption = "Proportions of Patients in Na_Blood Buckets", add.header = c('Sodium in Serum Measures', 'Before Imputation Frequency', 'After Imputation Frequency'))
+colnames(proportions_df) <- c('Sodium in Serum Measures', 'Before Imputation Freq.', 'After Imputation Freq.')
+pander(proportions_df, caption = "Proportions of Patients in Na_Blood Buckets")
 
 ```
 
@@ -166,6 +167,7 @@ proportions_df$after_imputation_freq <- new_col
 
 # Format the table using pander
 # pander(counts_df, caption = "Counts of Patients in Na_Blood Buckets")
+colnames(proportions_df) <- c('Potassium in Serum Measures', 'Before Imputation Freq.', 'After Imputation Freq.')
 pander(proportions_df, caption = "Proportions of Patients in Na_Blood Buckets")
 
 ```
