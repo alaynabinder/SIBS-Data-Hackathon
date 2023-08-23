@@ -1,14 +1,9 @@
 # SIBS-Data-Hackathon
 
-The NCSU-Duke SIBS Data Hack-a-Thon is a data analysis assignment where SIBS participants
-work in assigned teams to tackle a large, complex data set with the goal of addressing scientific
-research questions.
-
 Acute myocardial infarction (MI), more commonly known as a heart attack, is a condition that
 occurs when one or more areas of the heart muscle does not get enough oxygen. This happens
 when blood flow to the heart is abruptly cut off, typically caused by a blockage in one or more of
-the coronary arteries. MI results in heart tissue necrosis and is often life-threatening. For an
-overview of the clinical definition and management of MI, please see White and Chew, 2008.
+the coronary arteries. MI results in heart tissue necrosis and is often life-threatening.
 
 Treating and preventing MI is one of the most challenging problems of modern medicine, and it
 has been the focus on much medical research over the past 50 years. Acute myocardial infarction
@@ -25,4 +20,4 @@ regard, predicting complications of MI so necessary preventive measures can be c
 timely manner is an important task (Golovenkin, et al; 2020). 
 
 The primary goal is to identify risk factors for one of the following MI complications: atrial
-fibrillation, pulmonary edema, or relapse of the MI.
+fibrillation, pulmonary edema, or relapse of the MI. Our team focused on relapse of MI.
